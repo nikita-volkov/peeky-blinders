@@ -1,7 +1,7 @@
 module PeekyBlinders
   ( decodeByteString,
     Dynamic,
-    staticallySized,
+    dynamize,
     Static,
     int32InBe,
     int32InLe,
@@ -39,9 +39,9 @@ decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
 
 -- *
 
-{-# INLINE staticallySized #-}
-staticallySized :: Static a -> Dynamic a
-staticallySized (Static size io) = Dynamic $ \fail proceed p avail ->
+{-# INLINE dynamize #-}
+dynamize :: Static a -> Dynamic a
+dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ avail - size
