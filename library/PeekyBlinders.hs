@@ -99,6 +99,13 @@ int32InLe = Static 4 Ptr.IO.peekLEInt32
 
 {-|
 Collect a strict bytestring knowing its size.
+
+Typically, you\'ll be using it like this:
+
+@
+byteString :: 'Dynamic' ByteString
+byteString = 'dynamize' 'int32InBe' >>= 'dynamize' . 'byteStringBySize' . fromIntegral
+@
 -}
 {-# INLINE byteStringBySize #-}
 byteStringBySize :: Int -> Static ByteString

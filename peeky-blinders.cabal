@@ -1,5 +1,6 @@
 name: peeky-blinders
 version: 0.1
+synopsis: DSL for high-performance binary data deserialisation
 copyright: (c) 2021, Nikita Volkov
 license: MIT
 license-file: LICENSE
