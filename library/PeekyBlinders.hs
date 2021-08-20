@@ -1,7 +1,10 @@
 module PeekyBlinders
-  ( decodeByteString,
+  ( -- * Execution
+    decodeByteString,
+    -- * Dynamic
     Dynamic,
     dynamize,
+    -- * Static
     Static,
     int32InBe,
     int32InLe,
@@ -28,6 +31,9 @@ decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
 
 {-|
 Instruction on how to decode a data-structure of size only known at runtime.
+
+Provides for monadic composition,
+where the output of the one decoder determines what the following decoder should be.
 -}
 newtype Dynamic output = Dynamic (forall x. (Int -> IO x) -> (output -> Ptr Word8 -> Int -> IO x) -> Ptr Word8 -> Int -> IO x)
 
