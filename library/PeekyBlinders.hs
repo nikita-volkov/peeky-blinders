@@ -2,10 +2,10 @@ module PeekyBlinders
   ( decodeByteString,
     Dynamic,
     dynamize,
-    byteStringBySize,
     Static,
     int32InBe,
     int32InLe,
+    byteStringBySize,
   )
 where
 
@@ -55,13 +55,6 @@ dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ avail - size
 
-{-|
-Collect a strict bytestring knowing its size.
--}
-byteStringBySize :: Int -> Dynamic ByteString
-byteStringBySize =
-  error "TODO"
-
 -- *
 
 {-|
@@ -101,3 +94,10 @@ int32InBe = Static 4 Ptr.IO.peekBEInt32
 {-# INLINE int32InLe #-}
 int32InLe :: Static Int32
 int32InLe = Static 4 Ptr.IO.peekLEInt32
+
+{-|
+Collect a strict bytestring knowing its size.
+-}
+{-# INLINE byteStringBySize #-}
+byteStringBySize :: Int -> Static ByteString
+byteStringBySize size = Static size $ \p -> Ptr.IO.peekBytes p size
