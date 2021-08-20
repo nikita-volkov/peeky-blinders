@@ -1,6 +1,7 @@
 module PeekyBlinders
-  ( runOnByteString,
+  ( decodeByteString,
     Dynamic,
+    staticallySized,
     Static,
     int32InBe,
     int32InLe,
@@ -31,8 +32,8 @@ instance Monad Dynamic where
 
 -- *
 
-runOnByteString :: Dynamic a -> ByteString -> Either Int a
-runOnByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
+decodeByteString :: Dynamic a -> ByteString -> Either Int a
+decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO $ withForeignPtr bsFp $ \p ->
     peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
 
