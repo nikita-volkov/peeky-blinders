@@ -33,6 +33,10 @@ instance Monad Dynamic where
 
 -- *
 
+{-|
+Execute a dynamic decoder on a bytestring,
+failing with the amount of bytes required at least if it\'s too short.
+-}
 decodeByteString :: Dynamic a -> ByteString -> Either Int a
 decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO $ withForeignPtr bsFp $ \p ->
@@ -40,6 +44,10 @@ decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
 
 -- *
 
+{-|
+Convert a static decoder to the dynamic one.
+You can\'t go the other way around.
+-}
 {-# INLINE dynamize #-}
 dynamize :: Static a -> Dynamic a
 dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
@@ -61,6 +69,8 @@ Instruction on how to decode a data-structure of a statically known size.
 
 Prefer composing on the level of this abstraction when possible,
 since it\'s faster.
+There is no way to lift a dynamic decoder to this level though,
+so you can only compose out of static decoders here.
 -}
 data Static output =
   Static {-# UNPACK #-} !Int (Ptr Word8 -> IO output)
@@ -78,10 +88,16 @@ instance Applicative Static where
 
 -- *
 
+{-|
+4-byte signed Big-Endian integer.
+-}
 {-# INLINE int32InBe #-}
 int32InBe :: Static Int32
 int32InBe = Static 4 Ptr.IO.peekBEInt32
 
+{-|
+4-byte signed Little-Endian integer.
+-}
 {-# INLINE int32InLe #-}
 int32InLe :: Static Int32
 int32InLe = Static 4 Ptr.IO.peekLEInt32
