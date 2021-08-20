@@ -2,6 +2,7 @@ module PeekyBlinders
   ( decodeByteString,
     Dynamic,
     dynamize,
+    byteStringBySize,
     Static,
     int32InBe,
     int32InLe,
@@ -45,6 +46,13 @@ dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ avail - size
+
+{-|
+Collect a strict bytestring knowing its size.
+-}
+byteStringBySize :: Int -> Dynamic ByteString
+byteStringBySize =
+  error "TODO"
 
 -- *
 
