@@ -13,10 +13,23 @@ import PeekyBlinders.Prelude hiding (Dynamic)
 import qualified Data.ByteString.Internal as ByteString
 import qualified Ptr.IO
 
+-- *
+
+{-|
+Execute a dynamic decoder on a bytestring,
+failing with the amount of extra bytes required at least if it\'s too short.
+-}
+decodeByteString :: Dynamic a -> ByteString -> Either Int a
+decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
+  unsafeDupablePerformIO $ withForeignPtr bsFp $ \p ->
+    peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
+
+-- *
+
 {-|
 Instruction on how to decode a data-structure of size only known at runtime.
 -}
-newtype Dynamic a = Dynamic (forall x. (Int -> IO x) -> (a -> Ptr Word8 -> Int -> IO x) -> Ptr Word8 -> Int -> IO x)
+newtype Dynamic output = Dynamic (forall x. (Int -> IO x) -> (output -> Ptr Word8 -> Int -> IO x) -> Ptr Word8 -> Int -> IO x)
 
 instance Functor Dynamic where
   fmap f (Dynamic peek) = Dynamic $ \fail proceed -> peek fail (proceed . f)
@@ -30,17 +43,6 @@ instance Monad Dynamic where
   return = pure
   Dynamic lPeek >>= rk = Dynamic $ \fail proceed ->
     lPeek fail $ \lr -> case rk lr of Dynamic rPeek -> rPeek fail proceed
-
--- *
-
-{-|
-Execute a dynamic decoder on a bytestring,
-failing with the amount of bytes required at least if it\'s too short.
--}
-decodeByteString :: Dynamic a -> ByteString -> Either Int a
-decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
-  unsafeDupablePerformIO $ withForeignPtr bsFp $ \p ->
-    peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
 
 -- *
 
