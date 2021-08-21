@@ -134,5 +134,5 @@ shortByteString = 'dynamize' 'int32InBe' >>= 'dynamize' . 'shortByteStringBySize
 @
 -}
 {-# INLINE shortByteStringBySize #-}
-shortByteStringBySize :: Int -> Static ByteString
-shortByteStringBySize size = Static size $ \p -> Ptr.IO.peekBytes p size
+shortByteStringBySize :: Int -> Static ShortByteString
+shortByteStringBySize size = Static size $ \p -> Ptr.IO.peekShortByteString p size
