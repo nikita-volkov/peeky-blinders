@@ -34,6 +34,11 @@ Instruction on how to decode a data-structure of size only known at runtime.
 
 Provides for monadic composition,
 where the output of one decoder determines what the following decoder should be.
+
+Not all encodings require that much compositional freedom and
+can be composed with a more restricted 'Static' decoder,
+which provides for higher performance at the cost of a more restrictive
+applicative composition.
 -}
 newtype Dynamic output = Dynamic (forall x. (Int -> IO x) -> (output -> Ptr Word8 -> Int -> IO x) -> Ptr Word8 -> Int -> IO x)
 
