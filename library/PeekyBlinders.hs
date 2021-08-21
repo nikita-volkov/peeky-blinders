@@ -9,6 +9,7 @@ module PeekyBlinders
     int32InBe,
     int32InLe,
     byteStringBySize,
+    shortByteStringBySize,
   )
 where
 
@@ -121,3 +122,17 @@ byteString = 'dynamize' 'int32InBe' >>= 'dynamize' . 'byteStringBySize' . fromIn
 {-# INLINE byteStringBySize #-}
 byteStringBySize :: Int -> Static ByteString
 byteStringBySize size = Static size $ \p -> Ptr.IO.peekBytes p size
+
+{-|
+Collect a short bytestring knowing its size.
+
+Typically, you\'ll be using it like this:
+
+@
+shortByteString :: 'Dynamic' ShortByteString
+shortByteString = 'dynamize' 'int32InBe' >>= 'dynamize' . 'shortByteStringBySize' . fromIntegral
+@
+-}
+{-# INLINE shortByteStringBySize #-}
+shortByteStringBySize :: Int -> Static ByteString
+shortByteStringBySize size = Static size $ \p -> Ptr.IO.peekBytes p size
