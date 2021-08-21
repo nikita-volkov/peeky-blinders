@@ -4,6 +4,7 @@ module PeekyBlinders
     -- * Dynamic
     Dynamic,
     dynamize,
+    shortByteStringTerminatedByNull,
     -- * Static
     Static,
     int32InBe,
@@ -68,6 +69,19 @@ dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ avail - size
+
+{-|
+C-style string, which is a collection of bytes terminated by the first 0-valued byte.
+This last byte is not included in the decoded value.
+-}
+{-# INLINE shortByteStringTerminatedByNull #-}
+shortByteStringTerminatedByNull :: Dynamic ShortByteString
+shortByteStringTerminatedByNull = Dynamic $ \fail proceed p avail ->
+  Ptr.IO.peekNullTerminatedShortByteString p $ \size build ->
+    let sizeWithNull = succ size
+      in if avail < sizeWithNull
+        then fail $ avail - sizeWithNull
+        else build >>= \x -> proceed x (plusPtr p sizeWithNull) (avail - sizeWithNull)
 
 -- *
 
