@@ -14,11 +14,14 @@ module PeekyBlinders
     leSignedInt4,
     byteArrayAsByteString,
     byteArrayAsShortByteString,
+    staticArray,
   )
 where
 
 import qualified Data.ByteString.Char8 as Bsc
 import qualified Data.ByteString.Internal as ByteString
+import qualified Data.Vector.Generic as Vg
+import qualified Data.Vector.Generic.Mutable as Vgm
 import PeekyBlinders.Prelude hiding (Dynamic)
 import qualified Ptr.IO
 
@@ -157,3 +160,18 @@ byteArrayAsByteString size = Static size $ \p -> Ptr.IO.peekBytes p size
 {-# INLINE byteArrayAsShortByteString #-}
 byteArrayAsShortByteString :: Int -> Static ShortByteString
 byteArrayAsShortByteString size = Static size $ \p -> Ptr.IO.peekShortByteString p size
+
+-- |
+-- Construct an array of the specified amount of statically sized elements.
+staticArray :: Vg.Vector v a => Static a -> Int -> Static (v a)
+staticArray (Static elementSize peekElement) amount =
+  Static (elementSize * amount) $ \p -> do
+    v <- Vgm.unsafeNew amount
+    let populate i p =
+          if i < amount
+            then do
+              a <- peekElement p
+              Vgm.unsafeWrite v i a
+              populate (succ i) (plusPtr p elementSize)
+            else Vg.unsafeFreeze v
+     in populate 0 p
