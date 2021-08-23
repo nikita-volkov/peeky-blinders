@@ -4,6 +4,7 @@ module PeekyBlinders
     -- * Dynamic
     Dynamic,
     dynamize,
+    byteStringTerminatedByNull,
     shortByteStringTerminatedByNull,
     -- * Static
     Static,
@@ -16,6 +17,7 @@ where
 
 import PeekyBlinders.Prelude hiding (Dynamic)
 import qualified Data.ByteString.Internal as ByteString
+import qualified Data.ByteString.Char8 as Bsc
 import qualified Ptr.IO
 
 -- *
@@ -69,6 +71,18 @@ dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ size - avail
+
+{-|
+C-style string, which is a collection of bytes terminated by the first 0-valued byte.
+This last byte is not included in the decoded value.
+-}
+byteStringTerminatedByNull :: Dynamic ByteString
+byteStringTerminatedByNull = Dynamic $ \fail proceed p avail -> do
+  !bs <- Bsc.packCString (castPtr p)
+  let sizeWithNull = succ (Bsc.length bs)
+    in if avail < sizeWithNull
+      then fail $ sizeWithNull - avail
+      else proceed bs (plusPtr p sizeWithNull) (avail - sizeWithNull)
 
 {-|
 C-style string, which is a collection of bytes terminated by the first 0-valued byte.
