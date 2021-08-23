@@ -4,7 +4,7 @@ module PeekyBlinders
 
     -- * Dynamic
     Dynamic,
-    dynamize,
+    statically,
     nullTerminatedStringAsByteString,
     nullTerminatedStringAsShortByteString,
 
@@ -65,9 +65,9 @@ instance Monad Dynamic where
 -- |
 -- Convert a static decoder to the dynamic one.
 -- You can\'t go the other way around.
-{-# INLINE dynamize #-}
-dynamize :: Static a -> Dynamic a
-dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
+{-# INLINE statically #-}
+statically :: Static a -> Dynamic a
+statically (Static size io) = Dynamic $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ size - avail
@@ -139,7 +139,7 @@ leSignedInt4 = Static 4 Ptr.IO.peekLEInt32
 --
 -- @
 -- byteString :: 'Dynamic' ByteString
--- byteString = 'dynamize' 'beSignedInt4' >>= 'dynamize' . 'byteArrayAsByteString' . fromIntegral
+-- byteString = 'statically' 'beSignedInt4' >>= 'statically' . 'byteArrayAsByteString' . fromIntegral
 -- @
 {-# INLINE byteArrayAsByteString #-}
 byteArrayAsByteString :: Int -> Static ByteString
@@ -152,7 +152,7 @@ byteArrayAsByteString size = Static size $ \p -> Ptr.IO.peekBytes p size
 --
 -- @
 -- shortByteString :: 'Dynamic' ShortByteString
--- shortByteString = 'dynamize' 'beSignedInt4' >>= 'dynamize' . 'byteArrayAsShortByteString' . fromIntegral
+-- shortByteString = 'statically' 'beSignedInt4' >>= 'statically' . 'byteArrayAsShortByteString' . fromIntegral
 -- @
 {-# INLINE byteArrayAsShortByteString #-}
 byteArrayAsShortByteString :: Int -> Static ShortByteString
