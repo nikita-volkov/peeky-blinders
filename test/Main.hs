@@ -1,6 +1,8 @@
 module Main where
 
+import qualified Data.ByteString as Bs
 import qualified Data.Serialize as Cereal
+import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as Vu
 import qualified PeekyBlinders as Pb
 import qualified Test.QuickCheck as Qc
@@ -32,5 +34,20 @@ all =
           res = flip Pb.decodeByteString bs $ do
             size <- Pb.statically Pb.beSignedInt4
             Pb.statically $ Pb.staticArray Pb.beSignedInt4 $ fromIntegral size
+      return $ Right vec == res,
+    testProperty "dynamicArray" $ do
+      size <- Qc.choose (0, 99)
+      vec <- V.replicateM (fromIntegral size) $ do
+        size <- Qc.choose (0, 99)
+        byteList <- replicateM size $ Qc.choose (1, 255)
+        return $ Bs.pack byteList
+      let bs = Cereal.runPut $ do
+            Cereal.putInt32be size
+            V.forM_ vec $ \x -> do
+              Cereal.putByteString x
+              Cereal.putWord8 0
+          res = flip Pb.decodeByteString bs $ do
+            size <- Pb.statically Pb.beSignedInt4
+            Pb.dynamicArray Pb.nullTerminatedStringAsByteString $ fromIntegral size
       return $ Right vec == res
   ]
