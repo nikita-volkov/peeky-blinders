@@ -7,6 +7,7 @@ module PeekyBlinders
     statically,
     nullTerminatedStringAsByteString,
     nullTerminatedStringAsShortByteString,
+    dynamicArray,
 
     -- * Static
     Static,
@@ -97,6 +98,17 @@ nullTerminatedStringAsShortByteString = Dynamic $ \fail proceed p avail ->
      in if avail < sizeWithNull
           then fail $ sizeWithNull - avail
           else build >>= \x -> proceed x (plusPtr p sizeWithNull) (avail - sizeWithNull)
+
+-- |
+-- Array of dynamically sized elements of the specified amount.
+dynamicArray :: Vg.Vector v a => Dynamic a -> Int -> Dynamic (v a)
+dynamicArray (Dynamic peekElement) amount = Dynamic $ \fail proceed p avail -> do
+  v <- Vgm.unsafeNew amount
+  let populate i p avail =
+        if i < amount
+          then peekElement fail (\a p avail -> Vgm.unsafeWrite v i a >> populate (succ i) p avail) p avail
+          else Vg.unsafeFreeze v >>= \v -> proceed v p avail
+   in populate 0 p avail
 
 -- *
 
