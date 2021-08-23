@@ -68,7 +68,7 @@ dynamize :: Static a -> Dynamic a
 dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
-    else fail $ avail - size
+    else fail $ size - avail
 
 {-|
 C-style string, which is a collection of bytes terminated by the first 0-valued byte.
@@ -80,7 +80,7 @@ shortByteStringTerminatedByNull = Dynamic $ \fail proceed p avail ->
   Ptr.IO.peekNullTerminatedShortByteString p $ \size build ->
     let sizeWithNull = succ size
       in if avail < sizeWithNull
-        then fail $ avail - sizeWithNull
+        then fail $ sizeWithNull - avail
         else build >>= \x -> proceed x (plusPtr p sizeWithNull) (avail - sizeWithNull)
 
 -- *
