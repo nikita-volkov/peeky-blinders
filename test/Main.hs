@@ -12,12 +12,12 @@ all =
   [ testCase "Unterminated C-string" $ do
       assertEqual "" Nothing $
         either (const Nothing) Just $
-          Pb.decodeByteString Pb.byteStringTerminatedByNull "\1\2\3\4",
+          Pb.decodeByteString Pb.nullTerminatedStringAsByteString "\1\2\3\4",
     testCase "Terminated C-string" $ do
       assertEqual "" (Right "abc") $
-        Pb.decodeByteString Pb.byteStringTerminatedByNull "abc\0d",
+        Pb.decodeByteString Pb.nullTerminatedStringAsByteString "abc\0d",
     testCase "Composition after C-string" $ do
       assertEqual "" (Right ("abc", "def")) $
         flip Pb.decodeByteString "abc\0def\0" $
-          (,) <$> Pb.byteStringTerminatedByNull <*> Pb.byteStringTerminatedByNull
+          (,) <$> Pb.nullTerminatedStringAsByteString <*> Pb.nullTerminatedStringAsByteString
   ]

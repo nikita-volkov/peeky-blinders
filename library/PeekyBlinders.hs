@@ -5,15 +5,15 @@ module PeekyBlinders
     -- * Dynamic
     Dynamic,
     dynamize,
-    byteStringTerminatedByNull,
-    shortByteStringTerminatedByNull,
+    nullTerminatedStringAsByteString,
+    nullTerminatedStringAsShortByteString,
 
     -- * Static
     Static,
-    int32InBe,
-    int32InLe,
-    byteStringBySize,
-    shortByteStringBySize,
+    beSignedInt4,
+    leSignedInt4,
+    byteArrayAsByteString,
+    byteArrayAsShortByteString,
   )
 where
 
@@ -75,8 +75,8 @@ dynamize (Static size io) = Dynamic $ \fail proceed p avail ->
 -- |
 -- C-style string, which is a collection of bytes terminated by the first 0-valued byte.
 -- This last byte is not included in the decoded value.
-byteStringTerminatedByNull :: Dynamic ByteString
-byteStringTerminatedByNull = Dynamic $ \fail proceed p avail -> do
+nullTerminatedStringAsByteString :: Dynamic ByteString
+nullTerminatedStringAsByteString = Dynamic $ \fail proceed p avail -> do
   !bs <- Bsc.packCString (castPtr p)
   let sizeWithNull = succ (Bsc.length bs)
    in if avail < sizeWithNull
@@ -86,9 +86,9 @@ byteStringTerminatedByNull = Dynamic $ \fail proceed p avail -> do
 -- |
 -- C-style string, which is a collection of bytes terminated by the first 0-valued byte.
 -- This last byte is not included in the decoded value.
-{-# INLINE shortByteStringTerminatedByNull #-}
-shortByteStringTerminatedByNull :: Dynamic ShortByteString
-shortByteStringTerminatedByNull = Dynamic $ \fail proceed p avail ->
+{-# INLINE nullTerminatedStringAsShortByteString #-}
+nullTerminatedStringAsShortByteString :: Dynamic ShortByteString
+nullTerminatedStringAsShortByteString = Dynamic $ \fail proceed p avail ->
   Ptr.IO.peekNullTerminatedShortByteString p $ \size build ->
     let sizeWithNull = succ size
      in if avail < sizeWithNull
@@ -122,15 +122,15 @@ instance Applicative Static where
 
 -- |
 -- 4-byte signed Big-Endian integer.
-{-# INLINE int32InBe #-}
-int32InBe :: Static Int32
-int32InBe = Static 4 Ptr.IO.peekBEInt32
+{-# INLINE beSignedInt4 #-}
+beSignedInt4 :: Static Int32
+beSignedInt4 = Static 4 Ptr.IO.peekBEInt32
 
 -- |
 -- 4-byte signed Little-Endian integer.
-{-# INLINE int32InLe #-}
-int32InLe :: Static Int32
-int32InLe = Static 4 Ptr.IO.peekLEInt32
+{-# INLINE leSignedInt4 #-}
+leSignedInt4 :: Static Int32
+leSignedInt4 = Static 4 Ptr.IO.peekLEInt32
 
 -- |
 -- Collect a strict bytestring knowing its size.
@@ -139,11 +139,11 @@ int32InLe = Static 4 Ptr.IO.peekLEInt32
 --
 -- @
 -- byteString :: 'Dynamic' ByteString
--- byteString = 'dynamize' 'int32InBe' >>= 'dynamize' . 'byteStringBySize' . fromIntegral
+-- byteString = 'dynamize' 'beSignedInt4' >>= 'dynamize' . 'byteArrayAsByteString' . fromIntegral
 -- @
-{-# INLINE byteStringBySize #-}
-byteStringBySize :: Int -> Static ByteString
-byteStringBySize size = Static size $ \p -> Ptr.IO.peekBytes p size
+{-# INLINE byteArrayAsByteString #-}
+byteArrayAsByteString :: Int -> Static ByteString
+byteArrayAsByteString size = Static size $ \p -> Ptr.IO.peekBytes p size
 
 -- |
 -- Collect a short bytestring knowing its size.
@@ -152,8 +152,8 @@ byteStringBySize size = Static size $ \p -> Ptr.IO.peekBytes p size
 --
 -- @
 -- shortByteString :: 'Dynamic' ShortByteString
--- shortByteString = 'dynamize' 'int32InBe' >>= 'dynamize' . 'shortByteStringBySize' . fromIntegral
+-- shortByteString = 'dynamize' 'beSignedInt4' >>= 'dynamize' . 'byteArrayAsShortByteString' . fromIntegral
 -- @
-{-# INLINE shortByteStringBySize #-}
-shortByteStringBySize :: Int -> Static ShortByteString
-shortByteStringBySize size = Static size $ \p -> Ptr.IO.peekShortByteString p size
+{-# INLINE byteArrayAsShortByteString #-}
+byteArrayAsShortByteString :: Int -> Static ShortByteString
+byteArrayAsShortByteString size = Static size $ \p -> Ptr.IO.peekShortByteString p size
