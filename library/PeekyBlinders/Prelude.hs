@@ -53,10 +53,6 @@ import Data.Void as Exports
 import Data.Word as Exports
 import Debug.Trace as Exports
 import Foreign as Exports hiding (void)
-import Foreign.ForeignPtr as Exports
-import Foreign.Ptr as Exports
-import Foreign.StablePtr as Exports
-import Foreign.Storable as Exports
 import GHC.Conc as Exports hiding (orElse, threadWaitRead, threadWaitReadSTM, threadWaitWrite, threadWaitWriteSTM, withMVar)
 import GHC.Exts as Exports (IsList (..), groupWith, inline, lazy, sortWith)
 import GHC.Generics as Exports (Generic)
