@@ -101,6 +101,7 @@ nullTerminatedStringAsShortByteString = Dynamic $ \fail proceed p avail ->
 
 -- |
 -- Array of dynamically sized elements of the specified amount.
+{-# INLINE dynamicArray #-}
 dynamicArray :: Vg.Vector v a => Dynamic a -> Int -> Dynamic (v a)
 dynamicArray (Dynamic peekElement) amount = Dynamic $ \fail proceed p avail -> do
   v <- Vgm.unsafeNew amount
@@ -175,6 +176,7 @@ byteArrayAsShortByteString size = Static size $ \p -> Ptr.IO.peekShortByteString
 
 -- |
 -- Construct an array of the specified amount of statically sized elements.
+{-# INLINE staticArray #-}
 staticArray :: Vg.Vector v a => Static a -> Int -> Static (v a)
 staticArray (Static elementSize peekElement) amount =
   Static (elementSize * amount) $ \p -> do
