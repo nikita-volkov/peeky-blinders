@@ -23,6 +23,7 @@ import qualified Data.ByteString.Char8 as Bsc
 import qualified Data.ByteString.Internal as ByteString
 import qualified Data.Vector.Generic as Vg
 import qualified Data.Vector.Generic.Mutable as Vgm
+import qualified Data.Vector.Unboxed as Vu
 import PeekyBlinders.Prelude hiding (Dynamic)
 import qualified Ptr.IO
 
@@ -173,6 +174,10 @@ byteArrayAsByteString size = Static size $ \p -> Ptr.IO.peekBytes p size
 {-# INLINE byteArrayAsShortByteString #-}
 byteArrayAsShortByteString :: Int -> Static ShortByteString
 byteArrayAsShortByteString size = Static size $ \p -> Ptr.IO.peekShortByteString p size
+
+{-# INLINE byteArrayAsVector #-}
+byteArrayAsVector :: Int -> Static (Vu.Vector Word8)
+byteArrayAsVector = error "TODO"
 
 -- |
 -- Construct an array of the specified amount of statically sized elements.
