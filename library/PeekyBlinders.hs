@@ -11,6 +11,8 @@ module PeekyBlinders
 
     -- * Static
     Static,
+
+    -- ** Signed Integers
     signedInt1,
     beSignedInt2,
     leSignedInt2,
@@ -18,6 +20,8 @@ module PeekyBlinders
     leSignedInt4,
     beSignedInt8,
     leSignedInt8,
+
+    -- ** Arrays
     byteArrayAsByteString,
     byteArrayAsShortByteString,
     staticArray,
