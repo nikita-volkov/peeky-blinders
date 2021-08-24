@@ -12,6 +12,15 @@ module PeekyBlinders
     -- * Static
     Static,
 
+    -- ** Unsigned Integers
+    unsignedInt1,
+    beUnsignedInt2,
+    leUnsignedInt2,
+    beUnsignedInt4,
+    leUnsignedInt4,
+    beUnsignedInt8,
+    leUnsignedInt8,
+
     -- ** Signed Integers
     signedInt1,
     beSignedInt2,
@@ -145,6 +154,48 @@ instance Applicative Static where
       io ptr = leftIO ptr <*> rightIO (plusPtr ptr leftSize)
 
 -- *
+
+-- |
+-- 1-byte unsigned integer.
+{-# INLINE unsignedInt1 #-}
+unsignedInt1 :: Static Word8
+unsignedInt1 = Static 1 Ptr.IO.peekWord8
+
+-- |
+-- 2-byte unsigned Big-Endian integer.
+{-# INLINE beUnsignedInt2 #-}
+beUnsignedInt2 :: Static Word16
+beUnsignedInt2 = Static 2 Ptr.IO.peekBEWord16
+
+-- |
+-- 2-byte unsigned Little-Endian integer.
+{-# INLINE leUnsignedInt2 #-}
+leUnsignedInt2 :: Static Word16
+leUnsignedInt2 = Static 2 Ptr.IO.peekLEWord16
+
+-- |
+-- 4-byte unsigned Big-Endian integer.
+{-# INLINE beUnsignedInt4 #-}
+beUnsignedInt4 :: Static Word32
+beUnsignedInt4 = Static 4 Ptr.IO.peekBEWord32
+
+-- |
+-- 4-byte unsigned Little-Endian integer.
+{-# INLINE leUnsignedInt4 #-}
+leUnsignedInt4 :: Static Word32
+leUnsignedInt4 = Static 4 Ptr.IO.peekLEWord32
+
+-- |
+-- 8-byte unsigned Big-Endian integer.
+{-# INLINE beUnsignedInt8 #-}
+beUnsignedInt8 :: Static Word64
+beUnsignedInt8 = Static 8 Ptr.IO.peekBEWord64
+
+-- |
+-- 8-byte unsigned Little-Endian integer.
+{-# INLINE leUnsignedInt8 #-}
+leUnsignedInt8 :: Static Word64
+leUnsignedInt8 = Static 8 Ptr.IO.peekLEWord64
 
 -- |
 -- 1-byte signed integer.
