@@ -13,6 +13,8 @@ module PeekyBlinders
     Static,
     beSignedInt4,
     leSignedInt4,
+    beSignedInt8,
+    leSignedInt8,
     byteArrayAsByteString,
     byteArrayAsShortByteString,
     staticArray,
@@ -148,6 +150,18 @@ beSignedInt4 = Static 4 Ptr.IO.peekBEInt32
 {-# INLINE leSignedInt4 #-}
 leSignedInt4 :: Static Int32
 leSignedInt4 = Static 4 Ptr.IO.peekLEInt32
+
+-- |
+-- 8-byte signed Big-Endian integer.
+{-# INLINE beSignedInt8 #-}
+beSignedInt8 :: Static Int64
+beSignedInt8 = Static 8 Ptr.IO.peekBEInt64
+
+-- |
+-- 8-byte signed Little-Endian integer.
+{-# INLINE leSignedInt8 #-}
+leSignedInt8 :: Static Int64
+leSignedInt8 = Static 8 Ptr.IO.peekLEInt64
 
 -- |
 -- Collect a strict bytestring knowing its size.
