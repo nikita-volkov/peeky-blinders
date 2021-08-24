@@ -9,6 +9,7 @@ import qualified Test.Tasty.HUnit as Tasty
 import Prelude
 
 main = do
+  putStrLn "Testing"
   arrayBenchmarks <-
     initArrayGroup
       [ ( "peeky-blinders",
@@ -30,6 +31,7 @@ main = do
            in either (const Nothing) Just . Cereal.runGet decoder
         )
       ]
+  putStrLn "Benchmarking"
   defaultMain
     [ bgroup "int32-le-triplet" $
         let input = Cereal.runPut (Cereal.putInt32le 1 <> Cereal.putInt32le 2 <> Cereal.putInt32le 3)
