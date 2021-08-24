@@ -11,6 +11,9 @@ module PeekyBlinders
 
     -- * Static
     Static,
+    signedInt1,
+    beSignedInt2,
+    leSignedInt2,
     beSignedInt4,
     leSignedInt4,
     beSignedInt8,
@@ -138,6 +141,24 @@ instance Applicative Static where
       io ptr = leftIO ptr <*> rightIO (plusPtr ptr leftSize)
 
 -- *
+
+-- |
+-- 1-byte signed integer.
+{-# INLINE signedInt1 #-}
+signedInt1 :: Static Int8
+signedInt1 = Static 1 Ptr.IO.peekInt8
+
+-- |
+-- 2-byte signed Big-Endian integer.
+{-# INLINE beSignedInt2 #-}
+beSignedInt2 :: Static Int16
+beSignedInt2 = Static 2 Ptr.IO.peekBEInt16
+
+-- |
+-- 2-byte signed Little-Endian integer.
+{-# INLINE leSignedInt2 #-}
+leSignedInt2 :: Static Int16
+leSignedInt2 = Static 2 Ptr.IO.peekLEInt16
 
 -- |
 -- 4-byte signed Big-Endian integer.
