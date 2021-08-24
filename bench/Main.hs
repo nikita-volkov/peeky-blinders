@@ -45,13 +45,16 @@ main = do
 
 -- | Test functions and create benchmarks out of them.
 initArrayGroup :: [(String, ByteString -> Maybe (Vu.Vector Int32))] -> IO [Benchmark]
-initArrayGroup subjects = do
-  forM subjects $ \(name, f) -> do
-    Tasty.assertEqual name (Just correctDecoding) (f input)
-    return $ bench name $ nf f input
+initArrayGroup = initGroup input correctDecoding
   where
     input =
       Cereal.runPut $
         Cereal.putInt32le 100 <> replicateM_ 100 (Cereal.putInt32le (-1))
     correctDecoding =
       Vu.replicate 100 (-1)
+
+initGroup :: (Eq a, Show a, NFData a) => ByteString -> a -> [(String, ByteString -> Maybe a)] -> IO [Benchmark]
+initGroup input correctDecoding subjects = do
+  forM subjects $ \(name, f) -> do
+    Tasty.assertEqual name (Just correctDecoding) (f input)
+    return $ bench name $ nf f input
