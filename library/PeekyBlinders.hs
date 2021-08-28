@@ -4,7 +4,7 @@ module PeekyBlinders
 
     -- * Dynamic
     Dynamic,
-    limit,
+    forceSize,
     statically,
     nullTerminatedStringAsByteString,
     nullTerminatedStringAsShortByteString,
@@ -87,11 +87,19 @@ instance Monad Dynamic where
 -- *
 
 -- |
--- Set an upper limit of available bytes to the specified amount for a decoder.
-{-# INLINE limit #-}
-limit :: Int -> Dynamic a -> Dynamic a
-limit amount (Dynamic dec) =
-  Dynamic $ \fail proceed p avail -> dec fail proceed p (min amount avail)
+-- Set an upper limit of available bytes to the specified amount for a decoder
+-- and advance the same amount of bytes regardless of how many is actually consumed.
+{-# INLINE forceSize #-}
+forceSize :: Int -> Dynamic a -> Dynamic a
+forceSize size (Dynamic dec) =
+  Dynamic $ \fail proceed p avail ->
+    if size > avail
+      then fail (size - avail)
+      else
+        let nextPtr = plusPtr p size
+            nextAvail = avail - size
+            newProceed o _ _ = proceed o nextPtr nextAvail
+         in dec fail newProceed p (min size avail)
 
 -- |
 -- Convert a static decoder to the dynamic one.

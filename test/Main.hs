@@ -50,7 +50,18 @@ all =
             size <- Pb.statically Pb.beSignedInt4
             Pb.dynamicArray Pb.nullTerminatedStringAsByteString $ fromIntegral size
       return $ Right vec == res,
-    testCase "limit" $
+    testCase "forceSize" $ do
       assertEqual "" (Left 1) $
-        Pb.decodeByteString (Pb.limit 3 (Pb.statically Pb.beSignedInt4)) "\1\2\3\4"
+        Pb.decodeByteString (Pb.forceSize 3 (Pb.statically Pb.beSignedInt4)) "\1\2\3\4"
+      let bs = Cereal.runPut $ do
+            Cereal.putInt32be 5
+            Cereal.putWord8 0
+            Cereal.putWord8 0
+            Cereal.putWord8 0
+            Cereal.putInt32be 7
+          dec = do
+            a <- Pb.forceSize 7 $ Pb.statically Pb.beSignedInt4
+            b <- Pb.statically Pb.beSignedInt4
+            return (a, b)
+       in assertEqual "" (Right (5, 7)) $ Pb.decodeByteString dec bs
   ]
