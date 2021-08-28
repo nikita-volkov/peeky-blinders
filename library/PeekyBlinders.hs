@@ -4,6 +4,7 @@ module PeekyBlinders
 
     -- * Dynamic
     Dynamic,
+    limit,
     statically,
     nullTerminatedStringAsByteString,
     nullTerminatedStringAsShortByteString,
@@ -84,6 +85,13 @@ instance Monad Dynamic where
     lPeek fail $ \lr -> case rk lr of Dynamic rPeek -> rPeek fail proceed
 
 -- *
+
+-- |
+-- Set an upper limit of available bytes to the specified amount for a decoder.
+{-# INLINE limit #-}
+limit :: Int -> Dynamic a -> Dynamic a
+limit amount (Dynamic dec) =
+  Dynamic $ \fail proceed p avail -> dec fail proceed p (min amount avail)
 
 -- |
 -- Convert a static decoder to the dynamic one.

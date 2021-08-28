@@ -49,5 +49,8 @@ all =
           res = flip Pb.decodeByteString bs $ do
             size <- Pb.statically Pb.beSignedInt4
             Pb.dynamicArray Pb.nullTerminatedStringAsByteString $ fromIntegral size
-      return $ Right vec == res
+      return $ Right vec == res,
+    testCase "limit" $
+      assertEqual "" (Left 1) $
+        Pb.decodeByteString (Pb.limit 3 (Pb.statically Pb.beSignedInt4)) "\1\2\3\4"
   ]
