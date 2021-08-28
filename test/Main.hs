@@ -64,4 +64,6 @@ all =
             b <- Pb.statically Pb.beSignedInt4
             return (a, b)
        in assertEqual "" (Right (5, 7)) $ Pb.decodeByteString dec bs
+      assertEqual "" (Right 1) $
+        Pb.decodeByteString (Pb.forceSize 4 (Pb.statically Pb.beSignedInt4)) "\0\0\0\1"
   ]
