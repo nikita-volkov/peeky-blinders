@@ -9,6 +9,7 @@ module PeekyBlinders
     nullTerminatedStringAsByteString,
     nullTerminatedStringAsShortByteString,
     dynamicArray,
+    remainderAsByteString,
 
     -- * Static
     Static,
@@ -145,6 +146,11 @@ dynamicArray (Dynamic peekElement) amount = Dynamic $ \fail proceed p avail -> d
           then peekElement fail (\a p avail -> Vgm.unsafeWrite v i a >> populate (succ i) p avail) p avail
           else Vg.unsafeFreeze v >>= \v -> proceed v p avail
    in populate 0 p avail
+
+{-# INLINE remainderAsByteString #-}
+remainderAsByteString :: Dynamic ByteString
+remainderAsByteString = Dynamic $ \_ proceed p avail ->
+  Ptr.IO.peekBytes p avail >>= \x -> proceed x (plusPtr p avail) 0
 
 -- *
 
