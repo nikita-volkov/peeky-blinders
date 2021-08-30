@@ -2,4 +2,4 @@ resolver: nightly-2021-08-17
 extra-deps:
   - store-0.7.12
   - git: https://github.com/nikita-volkov/ptr
-    commit: "2830e0ba2aee5d990a57995345b90a9913f1fd7a"
+    commit: c06e83dbb3a57475ea01905a859c0471af71874d
