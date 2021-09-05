@@ -13,6 +13,7 @@ module PeekyBlinders
 
     -- * Static
     Static,
+    skip,
 
     -- ** Unsigned Integers
     unsignedInt1,
@@ -174,6 +175,10 @@ instance Applicative Static where
     where
       size = leftSize + rightSize
       io ptr = leftIO ptr <*> rightIO (plusPtr ptr leftSize)
+
+{-# INLINE skip #-}
+skip :: Int -> Static ()
+skip amount = Static amount (const (pure ()))
 
 -- *
 
