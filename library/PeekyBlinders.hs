@@ -53,7 +53,7 @@ import qualified Ptr.IO
 -- |
 -- Execute a dynamic decoder on a bytestring,
 -- failing with the amount of extra bytes required at least if it\'s too short.
-{-# INLINABLE decodeByteString #-}
+{-# INLINE decodeByteString #-}
 decodeByteString :: Dynamic a -> ByteString -> Either Int a
 decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO $
