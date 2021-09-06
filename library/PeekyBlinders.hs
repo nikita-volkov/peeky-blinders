@@ -79,6 +79,8 @@ instance Functor Dynamic where
 
 instance Applicative Dynamic where
   pure a = Dynamic $ \_ proceed -> proceed a
+  Dynamic lPeek <*> Dynamic rPeek = Dynamic $ \fail proceed ->
+    lPeek fail $ \lr -> rPeek fail $ \rr -> proceed (lr rr)
   liftA2 f (Dynamic lPeek) (Dynamic rPeek) = Dynamic $ \fail proceed ->
     lPeek fail $ \lr -> rPeek fail $ \rr -> proceed (f lr rr)
 
