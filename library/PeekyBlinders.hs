@@ -75,6 +75,7 @@ decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
 newtype Dynamic output = Dynamic (forall x. (Int -> IO x) -> (output -> Ptr Word8 -> Int -> IO x) -> Ptr Word8 -> Int -> IO x)
 
 instance Functor Dynamic where
+  {-# INLINE fmap #-}
   fmap f (Dynamic peek) = Dynamic $ \fail proceed -> peek fail (proceed . f)
 
 instance Applicative Dynamic where
