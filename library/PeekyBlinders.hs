@@ -5,6 +5,7 @@ module PeekyBlinders
 
     -- * Dynamic
     Dynamic,
+    hasMore,
     forceSize,
     statically,
     nullTerminatedStringAsByteString,
@@ -102,6 +103,11 @@ instance Monad Dynamic where
     lPeek fail $ \lr -> case rk lr of Dynamic rPeek -> rPeek fail proceed
 
 -- *
+
+-- |
+-- Check whether more data is available.
+hasMore :: Dynamic Bool
+hasMore = Dynamic $ \_ proceed p avail -> proceed (avail > 0) p avail
 
 -- |
 -- Set an upper limit of available bytes to the specified amount for a decoder
