@@ -102,6 +102,9 @@ instance Monad Dynamic where
   Dynamic lPeek >>= rk = Dynamic $ \fail proceed ->
     lPeek fail $ \lr -> case rk lr of Dynamic rPeek -> rPeek fail proceed
 
+instance MonadIO Dynamic where
+  liftIO io = Dynamic $ \_ proceed p avail -> io >>= \res -> proceed res p avail
+
 -- *
 
 -- |
