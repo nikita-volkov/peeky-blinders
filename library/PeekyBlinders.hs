@@ -50,7 +50,7 @@ import qualified Data.Vector.Unboxed as Vu
 import PeekyBlinders.Prelude hiding (Dynamic)
 import qualified Ptr.IO
 
--- *
+-- * Execution
 
 -- |
 -- Execute a dynamic decoder on a bytestring,
@@ -70,7 +70,7 @@ decodePtr :: Dynamic a -> Ptr Word8 -> Int -> IO (Either Int a)
 decodePtr (Dynamic peek) ptr avail =
   peek (pure . Left) (\output ptr avail -> return (Right output)) ptr avail
 
--- *
+-- * Dynamic
 
 -- |
 -- Instruction on how to decode a data-structure of size only known at runtime.
@@ -104,8 +104,6 @@ instance Monad Dynamic where
 
 instance MonadIO Dynamic where
   liftIO io = Dynamic $ \_ proceed p avail -> io >>= \res -> proceed res p avail
-
--- *
 
 -- |
 -- Check whether more data is available.
@@ -178,7 +176,7 @@ remainderAsByteString :: Dynamic ByteString
 remainderAsByteString = Dynamic $ \_ proceed p avail ->
   Ptr.IO.peekBytes p avail >>= \x -> proceed x (plusPtr p avail) 0
 
--- *
+-- * Static
 
 -- |
 -- Instruction on how to decode a data-structure of a statically known size.
@@ -204,8 +202,6 @@ instance Applicative Static where
 {-# INLINE skip #-}
 skip :: Int -> Static ()
 skip amount = Static amount (const (pure ()))
-
--- *
 
 -- |
 -- 1-byte unsigned integer.
