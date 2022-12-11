@@ -97,7 +97,15 @@ decodePtr (Dynamic peek) ptr avail =
 -- can be composed with a more restricted 'Static' decoder,
 -- which provides for higher performance at the cost of a more restrictive
 -- applicative composition.
-newtype Dynamic output = Dynamic (forall x. (Int -> IO x) -> (output -> Ptr Word8 -> Int -> IO x) -> Ptr Word8 -> Int -> IO x)
+newtype Dynamic output
+  = Dynamic
+      ( forall x.
+        (Int -> IO x) ->
+        (output -> Ptr Word8 -> Int -> IO x) ->
+        Ptr Word8 ->
+        Int ->
+        IO x
+      )
 
 instance Functor Dynamic where
   {-# INLINE fmap #-}
