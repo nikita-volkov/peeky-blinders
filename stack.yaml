@@ -1,5 +1,0 @@
-resolver: nightly-2021-11-06
-extra-deps:
-  - store-0.7.12
-  - git: https://github.com/nikita-volkov/ptr
-    commit: 5936f50a32c2ffea979c52ae64348c928d60f898
