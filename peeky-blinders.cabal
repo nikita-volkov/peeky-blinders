@@ -62,7 +62,7 @@ library
 
   build-depends:
       base        >=4.14     && <5
-    , bytestring  >=0.10     && <0.12
+    , bytestring  >=0.11     && <0.12
     , ptr         >=0.16.8.4 && <0.17
     , selective   >=0.5      && <0.6
     , text        >=2        && <3
