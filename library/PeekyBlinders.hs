@@ -73,6 +73,9 @@ decodePtr (Dynamic peek) ptr avail =
 -- * Dynamic
 
 -- |
+-- 'ByteString'-processor optimized for both multi-chunk and single-chunk
+-- input.
+--
 -- Instruction on how to decode a data-structure of size only known at runtime.
 --
 -- Provides for monadic composition,
