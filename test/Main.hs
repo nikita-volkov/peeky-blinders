@@ -18,20 +18,20 @@ all =
   [ testCase "Unterminated C-string" $ do
       assertEqual "" Nothing $
         either (const Nothing) Just $
-          Pb.decodeByteString Pb.nullTerminatedStringAsByteString "\1\2\3\4",
+          Pb.decodeByteStringDynamically Pb.nullTerminatedStringAsByteString "\1\2\3\4",
     testCase "Terminated C-string" $ do
       assertEqual "" (Right "abc") $
-        Pb.decodeByteString Pb.nullTerminatedStringAsByteString "abc\0d",
+        Pb.decodeByteStringDynamically Pb.nullTerminatedStringAsByteString "abc\0d",
     testCase "Composition after C-string" $ do
       assertEqual "" (Right ("abc", "def")) $
-        flip Pb.decodeByteString "abc\0def\0" $
+        flip Pb.decodeByteStringDynamically "abc\0def\0" $
           (,) <$> Pb.nullTerminatedStringAsByteString <*> Pb.nullTerminatedStringAsByteString,
     testProperty "staticArray" $ do
       vec <- Qc.arbitrary @(Vu.Vector Int32)
       let bs = Cereal.runPut $ do
             Cereal.putInt32be $ fromIntegral $ Vu.length vec
             Vu.forM_ vec $ Cereal.putInt32be
-          res = flip Pb.decodeByteString bs $ do
+          res = flip Pb.decodeByteStringDynamically bs $ do
             size <- Pb.statically Pb.beSignedInt4
             Pb.statically $ Pb.staticArray Pb.beSignedInt4 $ fromIntegral size
       return $ Right vec == res,
@@ -46,13 +46,13 @@ all =
             V.forM_ vec $ \x -> do
               Cereal.putByteString x
               Cereal.putWord8 0
-          res = flip Pb.decodeByteString bs $ do
+          res = flip Pb.decodeByteStringDynamically bs $ do
             size <- Pb.statically Pb.beSignedInt4
             Pb.dynamicArray Pb.nullTerminatedStringAsByteString $ fromIntegral size
       return $ Right vec == res,
     testCase "forceSize" $ do
       assertEqual "" (Left 1) $
-        Pb.decodeByteString (Pb.forceSize 3 (Pb.statically Pb.beSignedInt4)) "\1\2\3\4"
+        Pb.decodeByteStringDynamically (Pb.forceSize 3 (Pb.statically Pb.beSignedInt4)) "\1\2\3\4"
       let bs = Cereal.runPut $ do
             Cereal.putInt32be 5
             Cereal.putWord8 0
@@ -63,7 +63,7 @@ all =
             a <- Pb.forceSize 7 $ Pb.statically Pb.beSignedInt4
             b <- Pb.statically Pb.beSignedInt4
             return (a, b)
-       in assertEqual "" (Right (5, 7)) $ Pb.decodeByteString dec bs
+       in assertEqual "" (Right (5, 7)) $ Pb.decodeByteStringDynamically dec bs
       assertEqual "" (Right 1) $
-        Pb.decodeByteString (Pb.forceSize 4 (Pb.statically Pb.beSignedInt4)) "\0\0\0\1"
+        Pb.decodeByteStringDynamically (Pb.forceSize 4 (Pb.statically Pb.beSignedInt4)) "\0\0\0\1"
   ]

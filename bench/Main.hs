@@ -20,10 +20,10 @@ main = do
             correctDecoding = (1, 2, 3)
             subjects =
               [ ( "peeky-blinders/statically",
-                  hush . Pb.decodeByteString (Pb.statically $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
+                  hush . Pb.decodeByteStringDynamically (Pb.statically $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
                 ),
                 ( "peeky-blinders/dynamically",
-                  hush . Pb.decodeByteString ((,,) <$> Pb.statically Pb.leSignedInt4 <*> Pb.statically Pb.leSignedInt4 <*> Pb.statically Pb.leSignedInt4)
+                  hush . Pb.decodeByteStringDynamically ((,,) <$> Pb.statically Pb.leSignedInt4 <*> Pb.statically Pb.leSignedInt4 <*> Pb.statically Pb.leSignedInt4)
                 ),
                 ( "store",
                   hush . Store.decode @(Int32, Int32, Int32)
@@ -46,7 +46,7 @@ main = do
                   let decoder = do
                         size <- Pb.statically Pb.leSignedInt4
                         Pb.statically $ Pb.staticArray @Vu.Vector Pb.leSignedInt4 $ fromIntegral size
-                   in hush . Pb.decodeByteString decoder
+                   in hush . Pb.decodeByteStringDynamically decoder
                 ),
                 ( "store",
                   let decoder = do
@@ -76,7 +76,7 @@ main = do
                       byteStringDecoder = do
                         size <- Pb.statically Pb.leSignedInt8
                         Pb.statically $ Pb.byteArrayAsByteString $ fromIntegral size
-                   in hush . Pb.decodeByteString decoder
+                   in hush . Pb.decodeByteStringDynamically decoder
                 ),
                 ( "store",
                   hush . Store.decode
