@@ -1,6 +1,7 @@
 module PeekyBlinders
   ( -- * Execution
     decodeByteString,
+    decodeByteStringStatically,
     decodePtr,
 
     -- * Dynamic
@@ -61,6 +62,17 @@ decodeByteString (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO $
     withForeignPtr bsFp $ \p ->
       peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
+
+-- |
+-- Execute a static decoder on a bytestring,
+-- failing with the amount of extra bytes required at least if it\'s too short.
+{-# INLINE decodeByteStringStatically #-}
+decodeByteStringStatically :: Static a -> ByteString -> Either Int a
+decodeByteStringStatically (Static size peek) (ByteString.PS bsFp bsOff bsSize) =
+  if bsSize > size
+    then Right . unsafeDupablePerformIO . withForeignPtr bsFp $ \p ->
+      peek (plusPtr p bsOff)
+    else Left $ size - bsSize
 
 -- |
 -- Execute a dynamic decoder on a pointer an amount of available bytes in it.
