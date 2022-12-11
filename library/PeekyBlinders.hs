@@ -179,12 +179,14 @@ remainderAsByteString = Dynamic $ \_ proceed p avail ->
 -- * Static
 
 -- |
+-- Maximally efficient 'ByteString' processor.
+--
 -- Instruction on how to decode a data-structure of a statically known size.
 --
 -- Prefer composing on the level of this abstraction when possible,
--- since it\'s faster.
+-- since it\'s the most efficient one.
 -- There is no way to lift a dynamic decoder to this level though,
--- so you can only compose out of static decoders here.
+-- so you can only compose out of static decoders here and only applicatively.
 data Static output
   = Static {-# UNPACK #-} !Int (Ptr Word8 -> IO output)
 
