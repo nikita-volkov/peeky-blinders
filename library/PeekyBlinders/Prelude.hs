@@ -13,6 +13,7 @@ import Control.Monad.Fail as Exports
 import Control.Monad.Fix as Exports hiding (fix)
 import Control.Monad.IO.Class as Exports
 import Control.Monad.ST as Exports
+import Control.Selective as Exports
 import Data.Bifunctor as Exports
 import Data.Bits as Exports
 import Data.Bool as Exports
