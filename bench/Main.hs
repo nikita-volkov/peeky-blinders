@@ -1,10 +1,10 @@
+import Criterion.Main
 import qualified Data.Persist as Persist
 import qualified Data.Serialize as Cereal
 import qualified Data.Store as Store
 import Data.String.ToString
 import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as Vu
-import Gauge.Main
 import qualified PeekyBlinders as Pb
 import qualified Test.Tasty.HUnit as Tasty
 import Prelude

@@ -51,11 +51,11 @@ benchmark bench
   default-extensions: Arrows, BangPatterns, BlockArguments, ConstraintKinds, DataKinds, DefaultSignatures, DeriveDataTypeable, DeriveFoldable, DeriveFunctor, DeriveGeneric, DeriveTraversable, EmptyDataDecls, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, LiberalTypeSynonyms, MagicHash, MultiParamTypeClasses, MultiWayIf, NoImplicitPrelude, NoMonomorphismRestriction, OverloadedStrings, PatternGuards, PatternSynonyms, ParallelListComp, QuasiQuotes, RankNTypes, RecordWildCards, ScopedTypeVariables, StandaloneDeriving, TemplateHaskell, TupleSections, TypeApplications, TypeFamilies, TypeOperators, UnboxedTuples
   default-language: Haskell2010
   build-depends:
-    cereal >=0.5.8 && <0.6,
-    gauge >=0.2.5 && <0.3,
+    cereal >=0.5.8.3 && <0.6,
+    criterion >=1.6 && <1.7,
     persist >=0.1.1.5 && <0.2,
     peeky-blinders,
-    rerebase >=1.10.0.1 && <2,
-    store >=0.7.10 && <0.8,
+    rerebase >=1.16.1 && <2,
+    store >=0.7.16 && <0.8,
     tasty-hunit >=0.10.0.3 && <0.11,
     tostring >=0.2.1.1 && <0.3
