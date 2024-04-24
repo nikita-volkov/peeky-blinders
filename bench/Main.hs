@@ -1,14 +1,13 @@
 import Criterion.Main
-import qualified Data.Persist as Persist
-import qualified Data.Serialize as Cereal
-import qualified Data.Store as Store
-import Data.String.ToString
-import qualified Data.Vector as V
-import qualified Data.Vector.Unboxed as Vu
-import qualified PeekyBlinders as Pb
-import qualified Test.Tasty.HUnit as Tasty
+import Data.Serialize qualified as Cereal
+import Data.Store qualified as Store
+import Data.Vector qualified as V
+import Data.Vector.Unboxed qualified as Vu
+import PeekyBlinders qualified as Pb
+import Test.Tasty.HUnit qualified as Tasty
 import Prelude
 
+main :: IO ()
 main = do
   putStrLn "Testing"
   groups <-
@@ -30,15 +29,13 @@ main = do
                 ),
                 ( "cereal",
                   hush . Cereal.runGet ((,,) <$> Cereal.getInt32le <*> Cereal.getInt32le <*> Cereal.getInt32le)
-                ),
-                ( "persist",
-                  hush . Persist.runGet ((,,) <$> Persist.getLE @Int32 <*> Persist.getLE @Int32 <*> Persist.getLE @Int32)
                 )
               ]
          in initGroup "int32-le-triplet" input correctDecoding subjects,
         let input =
-              Cereal.runPut $
-                Cereal.putInt32le 100 <> replicateM_ 100 (Cereal.putInt32le (-1))
+              Cereal.runPut
+                $ Cereal.putInt32le 100
+                <> replicateM_ 100 (Cereal.putInt32le (-1))
             correctDecoding =
               Vu.replicate 100 (-1)
             subjects =

@@ -43,13 +43,12 @@ module PeekyBlinders
   )
 where
 
-import qualified Data.ByteString.Char8 as Bsc
-import qualified Data.ByteString.Internal as ByteString
-import qualified Data.Vector.Generic as Vg
-import qualified Data.Vector.Generic.Mutable as Vgm
-import qualified Data.Vector.Unboxed as Vu
+import Data.ByteString.Char8 qualified as Bsc
+import Data.ByteString.Internal qualified as Bsi
+import Data.Vector.Generic qualified as Vg
+import Data.Vector.Generic.Mutable qualified as Vgm
 import PeekyBlinders.Prelude hiding (Dynamic)
-import qualified Ptr.IO
+import Ptr.IO qualified
 
 -- * Execution
 
@@ -58,9 +57,10 @@ import qualified Ptr.IO
 -- failing with the amount of extra bytes required at least if it\'s too short.
 {-# INLINE decodeByteStringDynamically #-}
 decodeByteStringDynamically :: Dynamic a -> ByteString -> Either Int a
-decodeByteStringDynamically (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
-  unsafeDupablePerformIO $
-    withForeignPtr bsFp $ \p ->
+decodeByteStringDynamically (Dynamic peek) (Bsi.PS bsFp bsOff bsSize) =
+  unsafeDupablePerformIO
+    $ withForeignPtr bsFp
+    $ \p ->
       peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
 
 -- |
@@ -68,7 +68,7 @@ decodeByteStringDynamically (Dynamic peek) (ByteString.PS bsFp bsOff bsSize) =
 -- failing with the amount of extra bytes required at least if it\'s too short.
 {-# INLINE decodeByteStringStatically #-}
 decodeByteStringStatically :: Static a -> ByteString -> Either Int a
-decodeByteStringStatically (Static size peek) (ByteString.PS bsFp bsOff bsSize) =
+decodeByteStringStatically (Static size peek) (Bsi.PS bsFp bsOff bsSize) =
   if bsSize > size
     then Right . unsafeDupablePerformIO . withForeignPtr bsFp $ \p ->
       peek (plusPtr p bsOff)
@@ -185,7 +185,7 @@ nullTerminatedStringAsShortByteString = Dynamic $ \fail proceed p avail ->
 -- |
 -- Array of dynamically sized elements of the specified amount.
 {-# INLINE dynamicArray #-}
-dynamicArray :: Vg.Vector v a => Dynamic a -> Int -> Dynamic (v a)
+dynamicArray :: (Vg.Vector v a) => Dynamic a -> Int -> Dynamic (v a)
 dynamicArray (Dynamic peekElement) amount = Dynamic $ \fail proceed p avail -> do
   v <- Vgm.unsafeNew amount
   let populate i p avail =
@@ -338,14 +338,10 @@ byteArrayAsByteString size = Static size $ \p -> Ptr.IO.peekBytes p size
 byteArrayAsShortByteString :: Int -> Static ShortByteString
 byteArrayAsShortByteString size = Static size $ \p -> Ptr.IO.peekShortByteString p size
 
-{-# INLINE byteArrayAsVector #-}
-byteArrayAsVector :: Int -> Static (Vu.Vector Word8)
-byteArrayAsVector = error "TODO"
-
 -- |
 -- Construct an array of the specified amount of statically sized elements.
 {-# INLINE staticArray #-}
-staticArray :: Vg.Vector v a => Static a -> Int -> Static (v a)
+staticArray :: (Vg.Vector v a) => Static a -> Int -> Static (v a)
 staticArray (Static elementSize peekElement) amount =
   Static (elementSize * amount) $ \p -> do
     v <- Vgm.unsafeNew amount
