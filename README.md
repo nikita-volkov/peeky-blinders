@@ -1,3 +1,7 @@
+# Peeky Blinders
+
+A high-performance binary data deserialization DSL for Haskell. Provides composable decoders for static (fixed-size) and dynamic (variable-size) binary data structures with superior performance compared to alternatives like cereal and store.
+
 # Benchmarks
 
 ```
