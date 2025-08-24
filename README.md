@@ -1,18 +1,18 @@
-# Peeky Blinders
+# ptr-peeker
 
 A high-performance binary data deserialization DSL for Haskell. Provides composable decoders for static (fixed-size) and dynamic (variable-size) binary data structures with superior performance compared to alternatives like cereal and store.
 
 # Benchmarks
 
 ```
-benchmarking int32-le-triplet/peeky-blinders/statically
+benchmarking int32-le-triplet/ptr-peeker/statically
 time                 14.89 ns   (14.71 ns .. 15.10 ns)
                      0.999 R²   (0.999 R² .. 1.000 R²)
 mean                 14.77 ns   (14.71 ns .. 14.94 ns)
 std dev              294.0 ps   (210.5 ps .. 498.3 ps)
 variance introduced by outliers: 30% (moderately inflated)
 
-benchmarking int32-le-triplet/peeky-blinders/dynamically
+benchmarking int32-le-triplet/ptr-peeker/dynamically
 time                 16.80 ns   (16.74 ns .. 16.90 ns)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 16.84 ns   (16.74 ns .. 17.02 ns)
@@ -33,7 +33,7 @@ mean                 21.68 ns   (21.56 ns .. 22.07 ns)
 std dev              628.8 ps   (301.6 ps .. 1.124 ns)
 variance introduced by outliers: 47% (moderately inflated)
 
-benchmarking array-of-int4/peeky-blinders
+benchmarking array-of-int4/ptr-peeker
 time                 107.3 ns   (106.9 ns .. 107.7 ns)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 107.3 ns   (107.0 ns .. 107.7 ns)
@@ -54,7 +54,7 @@ mean                 2.122 μs   (2.112 μs .. 2.139 μs)
 std dev              41.90 ns   (32.47 ns .. 54.31 ns)
 variance introduced by outliers: 22% (moderately inflated)
 
-benchmarking array-of-byte-arrays/peeky-blinders
+benchmarking array-of-byte-arrays/ptr-peeker
 time                 2.071 μs   (2.063 μs .. 2.080 μs)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 2.074 μs   (2.066 μs .. 2.084 μs)

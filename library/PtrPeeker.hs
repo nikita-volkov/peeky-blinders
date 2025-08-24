@@ -1,4 +1,4 @@
-module PeekyBlinders
+module PtrPeeker
   ( -- * Execution
     decodeByteStringDynamically,
     decodeByteStringStatically,
@@ -47,7 +47,7 @@ import Data.ByteString.Char8 qualified as Bsc
 import Data.ByteString.Internal qualified as Bsi
 import Data.Vector.Generic qualified as Vg
 import Data.Vector.Generic.Mutable qualified as Vgm
-import PeekyBlinders.Prelude hiding (Dynamic)
+import PtrPeeker.Prelude hiding (Dynamic)
 import Ptr.IO qualified
 
 -- * Execution

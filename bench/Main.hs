@@ -3,7 +3,7 @@ import Data.Serialize qualified as Cereal
 import Data.Store qualified as Store
 import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as Vu
-import PeekyBlinders qualified as Pb
+import PtrPeeker qualified as Pb
 import Test.Tasty.HUnit qualified as Tasty
 import Prelude
 
@@ -18,10 +18,10 @@ main = do
               Cereal.putInt32le 3
             correctDecoding = (1, 2, 3)
             subjects =
-              [ ( "peeky-blinders/statically",
+              [ ( "ptr-peeker/statically",
                   hush . Pb.decodeByteStringDynamically (Pb.statically $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
                 ),
-                ( "peeky-blinders/dynamically",
+                ( "ptr-peeker/dynamically",
                   hush . Pb.decodeByteStringDynamically ((,,) <$> Pb.statically Pb.leSignedInt4 <*> Pb.statically Pb.leSignedInt4 <*> Pb.statically Pb.leSignedInt4)
                 ),
                 ( "store",
@@ -39,7 +39,7 @@ main = do
             correctDecoding =
               Vu.replicate 100 (-1)
             subjects =
-              [ ( "peeky-blinders",
+              [ ( "ptr-peeker",
                   let decoder = do
                         size <- Pb.statically Pb.leSignedInt4
                         Pb.statically $ Pb.staticArray @Vu.Vector Pb.leSignedInt4 $ fromIntegral size
@@ -66,7 +66,7 @@ main = do
                 Cereal.putByteString "abc"
             correctDecoding = V.replicate 100 "abc"
             subjects =
-              [ ( "peeky-blinders",
+              [ ( "ptr-peeker",
                   let decoder = do
                         size <- Pb.statically Pb.leSignedInt8
                         Pb.dynamicArray @V.Vector byteStringDecoder $ fromIntegral size

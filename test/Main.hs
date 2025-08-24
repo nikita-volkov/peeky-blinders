@@ -4,7 +4,7 @@ import Data.ByteString qualified as Bs
 import Data.Serialize qualified as Cereal
 import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as Vu
-import PeekyBlinders qualified as Pb
+import PtrPeeker qualified as Pb
 import Test.QuickCheck qualified as Qc
 import Test.QuickCheck.Instances ()
 import Test.Tasty

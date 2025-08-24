@@ -1,4 +1,4 @@
-module PeekyBlinders.Prelude
+module PtrPeeker.Prelude
   ( module Exports,
   )
 where

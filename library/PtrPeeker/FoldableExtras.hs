@@ -1,6 +1,6 @@
-module PeekyBlinders.FoldableExtras where
+module PtrPeeker.FoldableExtras where
 
-import PeekyBlinders.Prelude
+import PtrPeeker.Prelude
 
 {-# INLINE consumeMonadically #-}
 consumeMonadically :: (Foldable f, Monad m) => f a -> b -> (b -> a -> m b) -> m b
