@@ -1,6 +1,34 @@
 # ptr-peeker
 
-A high-performance binary data deserialization DSL for Haskell. Provides composable decoders for fixed (fixed-size) and variable (variable-size) binary data structures with superior performance compared to alternatives like cereal and store.
+A high-performance binary data deserialization library for Haskell that provides composable decoders for both fixed-size and variable-size binary data structures.
+
+## Features
+
+- **High Performance**: Outperforms existing libraries like cereal and store in benchmarks
+- **Composable**: `Applicative` and `Monad` for elegant parser construction  
+- **Type-Safe**: Leverages Haskell's type system to prevent common binary parsing errors
+
+## Quick Start
+
+```haskell
+import PtrPeeker
+import qualified Data.Vector
+
+-- Decode a fixed-size record
+data Point = Point Int32 Int32 Int32
+
+point :: Fixed Point  
+point = Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4
+
+points :: Variable (Data.Vector.Vector Point)
+points = do
+  count <- fixedly beUnsignedInt4
+  Data.Vector.replicateM (fromIntegral count) (fixedly point)
+
+-- Execute decoders
+decodePoint :: ByteString -> Either Int Point
+decodePoint = decodeByteStringFixedly point
+```
 
 # Benchmarks
 

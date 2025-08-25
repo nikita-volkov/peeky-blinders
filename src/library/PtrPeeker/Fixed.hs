@@ -51,6 +51,11 @@ instance Applicative Fixed where
       size = leftSize + rightSize
       io ptr = leftIO ptr <*> rightIO (plusPtr ptr leftSize)
 
+-- |
+-- Skip the specified number of bytes without consuming them.
+--
+-- This is useful for advancing past padding or unused fields in binary formats.
+-- The decoder succeeds immediately without reading any data.
 {-# INLINE skip #-}
 skip :: Int -> Fixed ()
 skip amount = Fixed amount (const (pure ()))

@@ -1,3 +1,32 @@
+-- |
+-- High-performance composable binary data deserializers.
+--
+-- This module provides two types of decoders for parsing binary data:
+--
+-- * 'Fixed' decoders for compile-time known, fixed-size data structures
+-- * 'Variable' decoders for runtime-dependent, variable-size data structures
+--
+-- Both types support full 'Applicative' and 'Monad' composition, enabling
+-- elegant construction of complex binary parsers with superior performance.
+--
+-- == Quick Start
+--
+-- @
+-- import PtrPeeker
+--
+-- -- Decode a fixed-size record
+-- data Point = Point Int32 Int32 Int32
+-- pointDecoder = Point \<$\> beSignedInt4 \<*\> beSignedInt4 \<*\> beSignedInt4
+--
+-- -- Decode variable-length data
+-- variableString = do
+--   len <- fixedly beUnsignedInt4
+--   fixedly (byteArrayAsByteString (fromIntegral len))
+--
+-- -- Execute decoders
+-- result1 = decodeByteStringFixedly pointDecoder bytes
+-- result2 = decodeByteStringVariably variableString bytes
+-- @
 module PtrPeeker
   ( -- * Execution
     decodeByteStringVariably,
@@ -56,8 +85,11 @@ import PtrPeeker.Prelude
 -- * Execution
 
 -- |
--- Execute a variable decoder on a bytestring,
--- failing with the amount of extra bytes required at least if it\'s too short.
+-- Execute a variable decoder on a ByteString.
+--
+-- Returns either:
+-- * 'Left Int' - The number of additional bytes required if input is too short
+-- * 'Right a' - Successfully decoded value
 {-# INLINE decodeByteStringVariably #-}
 decodeByteStringVariably :: Variable a -> ByteString -> Either Int a
 decodeByteStringVariably (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
@@ -67,13 +99,11 @@ decodeByteStringVariably (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
       peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
 
 -- |
--- Execute a variable decoder on a bytestring returning both the decoded value and remaining bytes.
+-- Execute a variable decoder on a ByteString, returning both the decoded value and remaining bytes.
 --
--- This function takes a 'Variable' decoder and a 'ByteString', attempts to decode a value of type 'a'
--- from the beginning of the ByteString, and returns either:
---
--- * 'Left Int' - Error indicating the amount of extra bytes required at least if the ByteString is too short to decode a value of type 'a'.
--- * 'Right (a, ByteString)' - Successfully decoded value along with the remaining unconsumed bytes.
+-- Returns either:
+-- * 'Left Int' - The number of additional bytes required if input is too short
+-- * 'Right (a, ByteString)' - Successfully decoded value and unconsumed bytes
 decodeByteStringVariablyWithRemainders :: Variable a -> ByteString -> Either Int (a, ByteString)
 decodeByteStringVariablyWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO
@@ -94,8 +124,11 @@ decodeByteStringVariablyWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize
             bsSize
 
 -- |
--- Execute a fixed decoder on a bytestring,
--- failing with the amount of extra bytes required at least if it\'s too short.
+-- Execute a fixed decoder on a ByteString.
+--
+-- Returns either:
+-- * 'Left Int' - The number of additional bytes required if input is too short
+-- * 'Right a' - Successfully decoded value
 {-# INLINE decodeByteStringFixedly #-}
 decodeByteStringFixedly :: Fixed a -> ByteString -> Either Int a
 decodeByteStringFixedly (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
@@ -186,8 +219,10 @@ hasMore :: Variable Bool
 hasMore = Variable $ \_ proceed p avail -> proceed (avail > 0) p avail
 
 -- |
--- Set an upper limit of available bytes to the specified amount for a decoder
--- and advance the same amount of bytes regardless of how many is actually consumed.
+-- Constrain a decoder to consume exactly the specified number of bytes.
+--
+-- Advances the position by the given amount regardless of how many bytes
+-- the inner decoder actually consumes.
 {-# INLINE forceSize #-}
 forceSize :: Int -> Variable a -> Variable a
 forceSize size (Variable dec) =
@@ -201,8 +236,10 @@ forceSize size (Variable dec) =
          in dec fail newProceed p (min size avail)
 
 -- |
--- Convert a fixed decoder to the variable one.
--- You can\'t go the other way around.
+-- Lift a fixed decoder into the variable decoder context.
+--
+-- This allows you to use fixed-size decoders within variable-size parsing
+-- contexts. The reverse conversion (Variable to Fixed) is not possible.
 {-# INLINE fixedly #-}
 fixedly :: Fixed a -> Variable a
 fixedly (Fixed size io) = Variable $ \fail proceed p avail ->
@@ -246,6 +283,12 @@ variableArray (Variable peekElement) amount = Variable $ \fail proceed p avail -
           else Vg.unsafeFreeze v >>= \v -> proceed v p avail
    in populate 0 p avail
 
+-- |
+-- Consume all remaining bytes as a ByteString.
+--
+-- This decoder reads all available bytes from the current position to the end
+-- of the input, returning them as a strict ByteString. After execution,
+-- no bytes will remain available for subsequent decoders.
 {-# INLINE remainderAsByteString #-}
 remainderAsByteString :: Variable ByteString
 remainderAsByteString = Variable $ \_ proceed p avail ->
