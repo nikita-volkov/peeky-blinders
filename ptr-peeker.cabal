@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: ptr-peeker
-version: 0.1
+version: 0
 synopsis: DSL for high-performance binary data deserialisation
 description:
   A Domain Specific Language for high-performance binary data deserialization.
