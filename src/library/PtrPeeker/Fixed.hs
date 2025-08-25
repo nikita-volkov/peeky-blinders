@@ -180,3 +180,8 @@ fixedArray (Fixed elementSize peekElement) amount =
               populate (succ i) (plusPtr p elementSize)
             else Vg.unsafeFreeze v
      in populate 0 p
+
+-- | Fixed-size peeker for any Storable type.
+{-# INLINE storable #-}
+storable :: forall a. (Storable a) => Fixed a
+storable = Fixed (sizeOf (undefined :: a)) Ptr.IO.peekStorable

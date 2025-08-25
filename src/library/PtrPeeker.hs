@@ -18,6 +18,7 @@ module PtrPeeker
     -- * Fixed
     Fixed,
     skip,
+    storable,
 
     -- ** Unsigned Integers
     unsignedInt1,
