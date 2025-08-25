@@ -1,8 +1,9 @@
 module PtrPeeker
   ( -- * Execution
     decodeByteStringDynamically,
+    decodeByteStringDynamicallyWithRemainders,
     decodeByteStringStatically,
-    decodePtrDynamically,
+    decodePtrDynamicallyWithRemainders,
 
     -- * Dynamic
     Dynamic,
@@ -64,6 +65,33 @@ decodeByteStringDynamically (Dynamic peek) (Bsi.PS bsFp bsOff bsSize) =
       peek (return . Left) (\r _ _ -> return (Right r)) (plusPtr p bsOff) bsSize
 
 -- |
+-- Execute a dynamic decoder on a bytestring returning both the decoded value and remaining bytes.
+--
+-- This function takes a 'Dynamic' decoder and a 'ByteString', attempts to decode a value of type 'a'
+-- from the beginning of the ByteString, and returns either:
+--
+-- * 'Left Int' - Error indicating the amount of extra bytes required at least if the ByteString is too short to decode a value of type 'a'.
+-- * 'Right (a, ByteString)' - Successfully decoded value along with the remaining unconsumed bytes.
+decodeByteStringDynamicallyWithRemainders :: Dynamic a -> ByteString -> Either Int (a, ByteString)
+decodeByteStringDynamicallyWithRemainders (Dynamic peek) (Bsi.PS bsFp bsOff bsSize) =
+  unsafeDupablePerformIO
+    $ withForeignPtr bsFp
+    $ \ptr ->
+      let initialPtr = plusPtr ptr bsOff
+       in peek
+            (return . Left)
+            ( \output newPtr avail ->
+                return
+                  ( Right
+                      ( output,
+                        Bsi.PS bsFp (bsOff + minusPtr newPtr initialPtr) avail
+                      )
+                  )
+            )
+            initialPtr
+            bsSize
+
+-- |
 -- Execute a static decoder on a bytestring,
 -- failing with the amount of extra bytes required at least if it\'s too short.
 {-# INLINE decodeByteStringStatically #-}
@@ -80,9 +108,9 @@ decodeByteStringStatically (Static size peek) (Bsi.PS bsFp bsOff bsSize) =
 -- Fails with the amount of extra bytes required at least if it\'s too short.
 --
 -- Succeeds returning the output, the next pointer, and the remaining available bytes.
-{-# INLINE decodePtrDynamically #-}
-decodePtrDynamically :: Dynamic a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
-decodePtrDynamically (Dynamic peek) ptr avail =
+{-# INLINE decodePtrDynamicallyWithRemainders #-}
+decodePtrDynamicallyWithRemainders :: Dynamic a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
+decodePtrDynamicallyWithRemainders (Dynamic peek) ptr avail =
   peek
     (pure . Left)
     (\output ptr avail -> return (Right (output, ptr, avail)))
