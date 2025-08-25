@@ -49,7 +49,7 @@ import Data.ByteString.Internal qualified as Bsi
 import Data.Vector.Generic qualified as Vg
 import Data.Vector.Generic.Mutable qualified as Vgm
 import Ptr.IO qualified
-import PtrPeeker.Prelude hiding (Variable)
+import PtrPeeker.Prelude
 
 -- * Execution
 
@@ -120,18 +120,35 @@ decodePtrVariablyWithRemainders (Variable peek) ptr avail =
 -- * Variable
 
 -- |
--- 'ByteString'-processor optimized for both multi-chunk and single-chunk
--- input.
+-- A high-level decoder for variable-sized data structures where the size
+-- is only known at runtime.
 --
--- Instruction on how to decode a data-structure of size only known at runtime.
+-- 'Variable' decoders are optimized for processing both multi-chunk and
+-- single-chunk input efficiently. They provide full monadic composition,
+-- allowing the output of one decoder to determine what the following
+-- decoder should be. This makes them ideal for complex binary formats
+-- where the structure depends on previously decoded values.
 --
--- Provides for monadic composition,
--- where the output of one decoder determines what the following decoder should be.
+-- Use 'Variable' when:
 --
--- Not all encodings require that much compositional freedom and
--- can be composed with a more restricted 'Fixed' decoder,
--- which provides for higher performance at the cost of a more restrictive
--- applicative composition.
+-- * Decoding length-prefixed data (arrays, strings)
+-- * The structure depends on previously decoded values
+-- * You need conditional or data-dependent parsing
+-- * Working with formats that have variable-length encoding
+--
+-- For better performance with fixed-size data, consider using 'Fixed' instead.
+-- You can convert a 'Fixed' decoder to 'Variable' using 'fixedly', but not
+-- the other way around.
+--
+-- Example usage:
+--
+-- @
+-- -- Decode a length-prefixed string
+-- variableLengthString :: Variable ByteString
+-- variableLengthString = do
+--   len <- fixedly beUnsignedInt4
+--   fixedly (byteArrayAsByteString (fromIntegral len))
+-- @
 newtype Variable output
   = Variable
       ( forall x.
@@ -237,16 +254,37 @@ remainderAsByteString = Variable $ \_ proceed p avail ->
 -- * Fixed
 
 -- |
--- Maximally efficient 'ByteString' processor.
+-- A highly optimized decoder for fixed-size data structures.
 --
--- Instruction on how to decode a data-structure of a fixed known size.
+-- 'Fixed' decoders are the most efficient way to decode binary data when
+-- the size of each element is known at compile time. They provide excellent
+-- performance characteristics due to their predictable memory access patterns
+-- and lack of runtime size calculations.
 --
--- Prefer composing on the level of this abstraction when possible,
--- since it\'s the most efficient one.
--- There is no way to lift a variable decoder to this level though,
--- so you can only compose out of fixed decoders here and only applicatively.
+-- Use 'Fixed' when:
+--
+-- * Decoding primitive types (integers, floats)
+-- * Working with fixed-size records or structures
+-- * Performance is critical and data layout is predictable
+-- * The binary format has a static, well-defined structure
+--
+-- 'Fixed' decoders can be lifted to 'Variable' using 'fixedly', but the
+-- reverse conversion is not possible due to the compile-time size requirement.
+--
+-- Example usage:
+--
+-- >-- Decode a fixed-size record
+-- >data Point = Point Int32 Int32 Int32
+-- >
+-- >point :: Fixed Point
+-- >point = Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4
 data Fixed output
-  = Fixed {-# UNPACK #-} !Int (Ptr Word8 -> IO output)
+  = -- |
+    -- The 'Fixed' constructor takes two parameters:
+    --
+    -- * Size in bytes (must be exact)
+    -- * IO action to perform the actual decoding from a pointer
+    Fixed {-# UNPACK #-} !Int (Ptr Word8 -> IO output)
 
 instance Functor Fixed where
   fmap fn (Fixed size io) = Fixed size (fmap fn . io)
