@@ -4,7 +4,7 @@ version: 0
 synopsis: DSL for high-performance binary data deserialisation
 description:
   A Domain Specific Language for high-performance binary data deserialization.
-  Provides composable, monadic decoders for both static (fixed-size) and dynamic
+  Provides composable, monadic decoders for both fixed (fixed-size) and variable
   (variable-size) binary data structures. Outperforms existing libraries like
   cereal and store in benchmarks.
 

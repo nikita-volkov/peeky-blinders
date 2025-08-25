@@ -1,18 +1,18 @@
 # ptr-peeker
 
-A high-performance binary data deserialization DSL for Haskell. Provides composable decoders for static (fixed-size) and dynamic (variable-size) binary data structures with superior performance compared to alternatives like cereal and store.
+A high-performance binary data deserialization DSL for Haskell. Provides composable decoders for fixed (fixed-size) and variable (variable-size) binary data structures with superior performance compared to alternatives like cereal and store.
 
 # Benchmarks
 
 ```
-benchmarking int32-le-triplet/ptr-peeker/statically
+benchmarking int32-le-triplet/ptr-peeker/fixedly
 time                 14.89 ns   (14.71 ns .. 15.10 ns)
                      0.999 R²   (0.999 R² .. 1.000 R²)
 mean                 14.77 ns   (14.71 ns .. 14.94 ns)
 std dev              294.0 ps   (210.5 ps .. 498.3 ps)
 variance introduced by outliers: 30% (moderately inflated)
 
-benchmarking int32-le-triplet/ptr-peeker/dynamically
+benchmarking int32-le-triplet/ptr-peeker/variably
 time                 16.80 ns   (16.74 ns .. 16.90 ns)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 16.84 ns   (16.74 ns .. 17.02 ns)
