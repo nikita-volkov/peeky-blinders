@@ -75,12 +75,19 @@ decodeByteStringStatically (Static size peek) (Bsi.PS bsFp bsOff bsSize) =
     else Left $ size - bsSize
 
 -- |
--- Execute a dynamic decoder on a pointer an amount of available bytes in it.
+-- Execute a dynamic decoder on a pointer and an amount of available bytes in it.
+--
 -- Fails with the amount of extra bytes required at least if it\'s too short.
+--
+-- Succeeds returning the output, the next pointer, and the remaining available bytes.
 {-# INLINE decodePtrDynamically #-}
-decodePtrDynamically :: Dynamic a -> Ptr Word8 -> Int -> IO (Either Int a)
+decodePtrDynamically :: Dynamic a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
 decodePtrDynamically (Dynamic peek) ptr avail =
-  peek (pure . Left) (\output ptr avail -> return (Right output)) ptr avail
+  peek
+    (pure . Left)
+    (\output ptr avail -> return (Right (output, ptr, avail)))
+    ptr
+    avail
 
 -- * Dynamic
 
