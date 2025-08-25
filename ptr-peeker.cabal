@@ -89,6 +89,7 @@ library
   hs-source-dirs: src/library
   exposed-modules: PtrPeeker
   other-modules:
+    PtrPeeker.Fixed
     PtrPeeker.Prelude
 
   build-depends:
