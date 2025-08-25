@@ -1,33 +1,32 @@
-{-|
-High-performance composable binary data deserializers.
-
-This module provides two types of decoders for parsing binary data:
-
-* 'Fixed' decoders for compile-time known, fixed-size data structures
-* 'Variable' decoders for runtime-dependent, variable-size data structures
-
-Both types support full 'Applicative' and 'Monad' composition, enabling
-elegant construction of complex binary parsers with superior performance.
-
-== Quick Start
-
-@
-import PtrPeeker
-
--- Decode a fixed-size record
-data Point = Point Int32 Int32 Int32
-pointDecoder = Point \<$\> beSignedInt4 \<*\> beSignedInt4 \<*\> beSignedInt4
-
--- Decode variable-length data  
-variableString = do
-  len <- fixedly beUnsignedInt4
-  fixedly (byteArrayAsByteString (fromIntegral len))
-
--- Execute decoders
-result1 = decodeByteStringFixedly pointDecoder bytes
-result2 = decodeByteStringVariably variableString bytes
-@
--}
+-- |
+-- High-performance composable binary data deserializers.
+--
+-- This module provides two types of decoders for parsing binary data:
+--
+-- * 'Fixed' decoders for compile-time known, fixed-size data structures
+-- * 'Variable' decoders for runtime-dependent, variable-size data structures
+--
+-- Both types support full 'Applicative' and 'Monad' composition, enabling
+-- elegant construction of complex binary parsers with superior performance.
+--
+-- == Quick Start
+--
+-- @
+-- import PtrPeeker
+--
+-- -- Decode a fixed-size record
+-- data Point = Point Int32 Int32 Int32
+-- pointDecoder = Point \<$\> beSignedInt4 \<*\> beSignedInt4 \<*\> beSignedInt4
+--
+-- -- Decode variable-length data
+-- variableString = do
+--   len <- fixedly beUnsignedInt4
+--   fixedly (byteArrayAsByteString (fromIntegral len))
+--
+-- -- Execute decoders
+-- result1 = decodeByteStringFixedly pointDecoder bytes
+-- result2 = decodeByteStringVariably variableString bytes
+-- @
 module PtrPeeker
   ( -- * Execution
     decodeByteStringVariably,
@@ -221,7 +220,7 @@ hasMore = Variable $ \_ proceed p avail -> proceed (avail > 0) p avail
 
 -- |
 -- Constrain a decoder to consume exactly the specified number of bytes.
--- 
+--
 -- Advances the position by the given amount regardless of how many bytes
 -- the inner decoder actually consumes.
 {-# INLINE forceSize #-}
@@ -238,7 +237,7 @@ forceSize size (Variable dec) =
 
 -- |
 -- Lift a fixed decoder into the variable decoder context.
--- 
+--
 -- This allows you to use fixed-size decoders within variable-size parsing
 -- contexts. The reverse conversion (Variable to Fixed) is not possible.
 {-# INLINE fixedly #-}
@@ -286,7 +285,7 @@ variableArray (Variable peekElement) amount = Variable $ \fail proceed p avail -
 
 -- |
 -- Consume all remaining bytes as a ByteString.
--- 
+--
 -- This decoder reads all available bytes from the current position to the end
 -- of the input, returning them as a strict ByteString. After execution,
 -- no bytes will remain available for subsequent decoders.
@@ -343,7 +342,7 @@ instance Applicative Fixed where
 
 -- |
 -- Skip the specified number of bytes without consuming them.
--- 
+--
 -- This is useful for advancing past padding or unused fields in binary formats.
 -- The decoder succeeds immediately without reading any data.
 {-# INLINE skip #-}
