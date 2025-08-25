@@ -24,7 +24,7 @@ import Data.Complex as Exports
 import Data.Data as Exports
 import Data.Dynamic as Exports
 import Data.Either as Exports
-import Data.Fixed as Exports
+import Data.Fixed as Exports hiding (Fixed)
 import Data.Foldable as Exports hiding (toList)
 import Data.Function as Exports hiding (id, (.))
 import Data.Functor as Exports hiding (unzip)
