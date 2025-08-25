@@ -47,8 +47,8 @@ import Data.ByteString.Char8 qualified as Bsc
 import Data.ByteString.Internal qualified as Bsi
 import Data.Vector.Generic qualified as Vg
 import Data.Vector.Generic.Mutable qualified as Vgm
-import PtrPeeker.Prelude hiding (Dynamic)
 import Ptr.IO qualified
+import PtrPeeker.Prelude hiding (Dynamic)
 
 -- * Execution
 

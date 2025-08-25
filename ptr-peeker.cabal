@@ -2,11 +2,12 @@ cabal-version: 3.0
 name: ptr-peeker
 version: 0.1
 synopsis: DSL for high-performance binary data deserialisation
-description: 
+description:
   A Domain Specific Language for high-performance binary data deserialization.
-  Provides composable, monadic decoders for both static (fixed-size) and dynamic 
-  (variable-size) binary data structures. Outperforms existing libraries like 
+  Provides composable, monadic decoders for both static (fixed-size) and dynamic
+  (variable-size) binary data structures. Outperforms existing libraries like
   cereal and store in benchmarks.
+
 copyright: (c) 2021, Nikita Volkov
 license: MIT
 license-file: LICENSE
