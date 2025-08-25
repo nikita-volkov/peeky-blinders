@@ -1,6 +1,88 @@
 # ptr-peeker
 
-A high-performance binary data deserialization DSL for Haskell. Provides composable decoders for fixed (fixed-size) and variable (variable-size) binary data structures with superior performance compared to alternatives like cereal and store.
+A high-performance binary data deserialization library for Haskell that provides composable decoders for both fixed-size and variable-size binary data structures.
+
+## Features
+
+- **High Performance**: Outperforms existing libraries like cereal and store in benchmarks
+- **Composable**: Full `Applicative` and `Monad` support for elegant parser construction  
+- **Type-Safe**: Leverages Haskell's type system to prevent common binary parsing errors
+- **Dual Decoder Types**:
+  - `Fixed` - for compile-time known, fixed-size data (optimal performance)
+  - `Variable` - for runtime-dependent, variable-size data (full flexibility)
+
+## Installation
+
+Add to your `package.yaml` dependencies:
+
+```yaml
+dependencies:
+  - ptr-peeker
+```
+
+Or to your `.cabal` file:
+
+```cabal
+build-depends: ptr-peeker
+```
+
+## Quick Start
+
+```haskell
+import PtrPeeker
+
+-- Decode a fixed-size record
+data Point = Point Int32 Int32 Int32
+
+pointDecoder :: Fixed Point  
+pointDecoder = Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4
+
+-- Decode a variable-length string
+variableLengthString :: Variable ByteString
+variableLengthString = do
+  len <- fixedly beUnsignedInt4
+  fixedly (byteArrayAsByteString (fromIntegral len))
+
+-- Execute decoders
+result1 = decodeByteStringFixedly pointDecoder bytes
+result2 = decodeByteStringVariably variableLengthString bytes
+```
+
+## API Overview
+
+### Core Types
+
+- **`Fixed a`** - Decoder for fixed-size data structures
+- **`Variable a`** - Decoder for variable-size data structures
+
+### Execution Functions
+
+- `decodeByteStringFixedly` - Execute a fixed decoder on a ByteString
+- `decodeByteStringVariably` - Execute a variable decoder on a ByteString
+- `decodeByteStringVariablyWithRemainders` - Like above but returns remaining bytes
+
+### Primitive Decoders
+
+Integer decoders in both big-endian (be) and little-endian (le) variants:
+- `unsignedInt1`, `signedInt1` - 8-bit integers
+- `beUnsignedInt2`, `leUnsignedInt2` - 16-bit unsigned integers  
+- `beSignedInt4`, `leSignedInt4` - 32-bit signed integers
+- `beUnsignedInt8`, `leUnsignedInt8` - 64-bit integers
+- And more...
+
+### Array and String Decoders
+
+- `fixedArray` - Fixed-size arrays
+- `variableArray` - Variable-size arrays
+- `byteArrayAsByteString` - Fixed-size byte arrays as ByteString
+- `nullTerminatedStringAsByteString` - C-style null-terminated strings
+
+### Utilities
+
+- `fixedly` - Convert Fixed decoder to Variable
+- `forceSize` - Constrain decoder to specific byte count
+- `hasMore` - Check if more data is available
+- `skip` - Skip a number of bytes
 
 # Benchmarks
 
