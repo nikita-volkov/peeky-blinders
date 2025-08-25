@@ -154,9 +154,7 @@ newtype Variable output
       ( forall x.
         (Int -> IO x) ->
         (output -> Ptr Word8 -> Int -> IO x) ->
-        Ptr Word8 ->
-        Int ->
-        IO x
+        (Ptr Word8 -> Int -> IO x)
       )
 
 instance Functor Variable where
