@@ -80,9 +80,10 @@ common test
 
 library
   import: base
-  hs-source-dirs: library
+  hs-source-dirs: src/library
   exposed-modules: PtrPeeker
   other-modules:
+    PtrPeeker.Fixed
     PtrPeeker.Prelude
 
   build-depends:
@@ -95,7 +96,7 @@ library
 test-suite test
   import: test
   type: exitcode-stdio-1.0
-  hs-source-dirs: test
+  hs-source-dirs: src/test
   main-is: Main.hs
   build-depends:
     QuickCheck >=2.8.1 && <3,
@@ -110,7 +111,7 @@ test-suite test
 benchmark bench
   import: executable
   type: exitcode-stdio-1.0
-  hs-source-dirs: bench
+  hs-source-dirs: src/bench
   main-is: Main.hs
   build-depends:
     cereal >=0.5.8.3 && <0.6,
