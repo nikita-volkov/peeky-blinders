@@ -14,8 +14,10 @@ import PtrPeeker.Prelude
 -- Execute a variable decoder on a ByteString.
 --
 -- Returns either:
--- * 'Left Int' - The number of additional bytes required if input is too short
--- * 'Right a' - Successfully decoded value
+-- 
+-- * The number of additional bytes required if input is too short
+-- 
+-- * Successfully decoded value
 {-# INLINE decodeByteStringWithVariable #-}
 decodeByteStringWithVariable :: Variable a -> ByteString -> Either Int a
 decodeByteStringWithVariable (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
@@ -28,8 +30,10 @@ decodeByteStringWithVariable (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
 -- Execute a variable decoder on a ByteString, returning both the decoded value and remaining bytes.
 --
 -- Returns either:
--- * 'Left Int' - The number of additional bytes required if input is too short
--- * 'Right (a, ByteString)' - Successfully decoded value and unconsumed bytes
+-- 
+-- * The number of additional bytes required if input is too short
+-- 
+-- * Successfully decoded value and unconsumed bytes
 decodeByteStringWithVariableWithRemainders :: Variable a -> ByteString -> Either Int (a, ByteString)
 decodeByteStringWithVariableWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO

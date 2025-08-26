@@ -12,8 +12,10 @@ import PtrPeeker.Prelude
 -- Execute a fixed decoder on a ByteString.
 --
 -- Returns either:
--- * 'Left Int' - The number of additional bytes required if input is too short
--- * 'Right a' - Successfully decoded value
+-- 
+-- * The number of additional bytes required if input is too short
+-- 
+-- * Successfully decoded value
 {-# INLINE decodeByteStringWithFixed #-}
 decodeByteStringWithFixed :: Fixed a -> ByteString -> Either Int a
 decodeByteStringWithFixed (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
