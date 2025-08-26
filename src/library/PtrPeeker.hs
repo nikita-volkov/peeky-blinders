@@ -6,27 +6,24 @@
 -- * 'Fixed' decoders for compile-time known, fixed-size data structures
 -- * 'Variable' decoders for runtime-dependent, variable-size data structures
 --
--- Both types support full 'Applicative' and 'Monad' composition, enabling
--- elegant construction of complex binary parsers with superior performance.
---
 -- == Quick Start
 --
--- @
--- import PtrPeeker
---
--- -- Decode a fixed-size record
--- data Point = Point Int32 Int32 Int32
--- pointDecoder = Point \<$\> beSignedInt4 \<*\> beSignedInt4 \<*\> beSignedInt4
---
--- -- Decode variable-length data
--- variableString = do
---   len <- fixed beUnsignedInt4
---   fixed (byteArrayAsByteString (fromIntegral len))
---
--- -- Execute decoders
--- result1 = decodeByteStringWithFixed pointDecoder bytes
--- result2 = decodeByteStringWithVariable variableString bytes
--- @
+-- > import PtrPeeker
+-- > import qualified Data.Vector
+-- >
+-- > data Point = Point Int32 Int32 Int32
+-- >
+-- > point :: Variable Point
+-- > point =
+-- >   fixed (Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4)
+-- >
+-- > points :: Variable (Data.Vector.Vector Point)
+-- > points = do
+-- >   count <- fixed beUnsignedInt4
+-- >   Data.Vector.replicateM (fromIntegral count) point
+-- >
+-- > decodePoint :: ByteString -> Either Int (Data.Vector.Vector Point)
+-- > decodePoint = decodeByteStringWithVariable points
 module PtrPeeker
   ( -- * Execution
     decodeByteStringWithVariable,

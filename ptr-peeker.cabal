@@ -3,16 +3,17 @@ name: ptr-peeker
 version: 0
 synopsis: High-performance composable binary data deserializers
 description:
-  A high-performance binary data deserialization library for Haskell that provides
-  two complementary types of decoders:
-  .
+  A high-performance binary data deserialization library providing a type-safe, flexible and composable abstraction over manipulations on pointers.
+
+  The API consists of two complementary abstractions:
+
   * 'Fixed' decoders for compile-time known, fixed-size data structures
+
   * 'Variable' decoders for runtime-dependent, variable-size data structures
-  .
-  Both decoder types are fully composable using standard 'Applicative' and 'Monad'
-  interfaces, enabling elegant construction of complex binary parsers. The library
-  delivers superior performance compared to alternatives like cereal and store,
-  making it ideal for high-throughput applications and systems programming.
+
+  In combination they allow to build decoders of any complexity.
+
+  The library delivers superior performance compared to alternatives like "cereal" and "store", making it ideal for high-throughput applications, networking, and systems programming.
 
 copyright: (c) 2021, Nikita Volkov
 license: MIT

@@ -4,9 +4,9 @@ A high-performance binary data deserialization library for Haskell that provides
 
 ## Features
 
-- **High Performance**: Outperforms existing libraries like cereal and store in benchmarks
-- **Composable**: `Applicative` and `Monad` for elegant parser construction  
-- **Type-Safe**: Leverages Haskell's type system to prevent common binary parsing errors
+- **High Performance**: Outperforms "cereal" and "store" (see [Benchmarks](#benchmarks))
+- **Flexible**: Lets you implement decoders of any complexity using standard `Applicative` and `Monad` interfaces
+- **Type-Safe**: Abstracts over low-level pointer manipulations
 
 ## Quick Start
 
@@ -14,23 +14,27 @@ A high-performance binary data deserialization library for Haskell that provides
 import PtrPeeker
 import qualified Data.Vector
 
--- Decode a fixed-size record
 data Point = Point Int32 Int32 Int32
 
-point :: Fixed Point  
-point = Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4
+point :: Variable Point  
+point =
+  fixed (Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4)
 
 points :: Variable (Data.Vector.Vector Point)
 points = do
   count <- fixed beUnsignedInt4
-  Data.Vector.replicateM (fromIntegral count) (fixed point)
+  Data.Vector.replicateM (fromIntegral count) point
 
--- Execute decoders
-decodePoint :: ByteString -> Either Int Point
-decodePoint = decodeByteStringWithFixed point
+decodePoint :: ByteString -> Either Int (Data.Vector.Vector Point)
+decodePoint = decodeByteStringWithVariable points
 ```
 
-# Benchmarks
+## Documentation
+
+- [Haddocks for the latest commit on `master`](https://nikita-volkov.github.io/ptr-peeker)
+- [Haddocks for releases on Hackage](https://hackage.haskell.org/package/ptr-peeker)
+
+## Benchmarks
 
 ```
 benchmarking int32-le-triplet/ptr-peeker/fixed

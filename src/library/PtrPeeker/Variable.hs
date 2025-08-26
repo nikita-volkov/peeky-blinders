@@ -152,6 +152,35 @@ forceSize size (Variable dec) =
 --
 -- This allows you to use fixed-size decoders within variable-size parsing
 -- contexts. The reverse conversion (Variable to Fixed) is not possible.
+--
+-- When decoding several fixed-size fields in sequence, prefer combining them
+-- inside a single Fixed decoder and lifting once, instead of lifting each field
+-- separately. This reduces overhead (fewer checks, fewer continuations, fewer
+-- pointer adjustments).
+--
+-- === Example (comparing styles):
+--
+-- Less optimal: 3 separate lifts (3 bounds checks, 3 continuations)
+--
+-- >triple1 :: Variable (Word32, Word32, Word16)
+-- >triple1 =
+-- >  (,,)
+-- >    <$> fixed beUnsignedInt4
+-- >    <*> fixed beUnsignedInt4
+-- >    <*> fixed beUnsignedInt2
+--
+-- More optimal: compose in Fixed, lift once (1 bounds check, 1 continuation)
+--
+-- >triple2 :: Variable (Word32, Word32, Word16)
+-- >triple2 =
+-- >  fixed
+-- >    ( (,,)
+-- >        <$> beUnsignedInt4
+-- >        <*> beUnsignedInt4
+-- >        <*> beUnsignedInt2
+-- >    )
+--
+-- The second form is typically faster in hot code paths.
 {-# INLINE fixed #-}
 fixed :: Fixed a -> Variable a
 fixed (Fixed size io) = Variable $ \fail proceed p avail ->
