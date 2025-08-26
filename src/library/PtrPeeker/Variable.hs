@@ -18,9 +18,9 @@ import PtrPeeker.Prelude
 -- * The number of additional bytes required if input is too short
 --
 -- * Successfully decoded value
-{-# INLINE decodeByteStringWithVariable #-}
-decodeByteStringWithVariable :: Variable a -> ByteString -> Either Int a
-decodeByteStringWithVariable (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
+{-# INLINE runVariableOnByteString #-}
+runVariableOnByteString :: Variable a -> ByteString -> Either Int a
+runVariableOnByteString (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO
     $ withForeignPtr bsFp
     $ \p ->
@@ -34,8 +34,8 @@ decodeByteStringWithVariable (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
 -- * The number of additional bytes required if input is too short
 --
 -- * Successfully decoded value and unconsumed bytes
-decodeByteStringWithVariableWithRemainders :: Variable a -> ByteString -> Either Int (a, ByteString)
-decodeByteStringWithVariableWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
+runVariableOnByteStringWithRemainders :: Variable a -> ByteString -> Either Int (a, ByteString)
+runVariableOnByteStringWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO
     $ withForeignPtr bsFp
     $ \ptr ->
@@ -59,9 +59,9 @@ decodeByteStringWithVariableWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bs
 -- Fails with the amount of extra bytes required at least if it\'s too short.
 --
 -- Succeeds returning the output, the next pointer, and the remaining available bytes.
-{-# INLINE decodePtrWithVariableWithRemainders #-}
-decodePtrWithVariableWithRemainders :: Variable a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
-decodePtrWithVariableWithRemainders (Variable peek) ptr avail =
+{-# INLINE runVariableOnPtrWithRemainders #-}
+runVariableOnPtrWithRemainders :: Variable a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
+runVariableOnPtrWithRemainders (Variable peek) ptr avail =
   peek
     (pure . Left)
     (\output ptr avail -> return (Right (output, ptr, avail)))

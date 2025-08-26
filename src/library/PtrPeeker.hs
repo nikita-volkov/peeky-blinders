@@ -23,13 +23,13 @@
 -- >   Data.Vector.replicateM (fromIntegral count) point
 -- >
 -- > decodePoint :: ByteString -> Either Int (Data.Vector.Vector Point)
--- > decodePoint = decodeByteStringWithVariable points
+-- > decodePoint = runVariableOnByteString points
 module PtrPeeker
   ( -- * Execution
-    decodeByteStringWithVariable,
-    decodeByteStringWithVariableWithRemainders,
-    decodeByteStringWithFixed,
-    decodePtrWithVariableWithRemainders,
+    runVariableOnByteString,
+    runVariableOnByteStringWithRemainders,
+    runVariableOnPtrWithRemainders,
+    runFixedOnByteString,
 
     -- * Variable
     Variable,

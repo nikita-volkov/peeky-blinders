@@ -19,10 +19,10 @@ main = do
             correctDecoding = (1, 2, 3)
             subjects =
               [ ( "ptr-peeker/fixed",
-                  hush . Pb.decodeByteStringWithVariable (Pb.fixed $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
+                  hush . Pb.runVariableOnByteString (Pb.fixed $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
                 ),
                 ( "ptr-peeker/variable",
-                  hush . Pb.decodeByteStringWithVariable ((,,) <$> Pb.fixed Pb.leSignedInt4 <*> Pb.fixed Pb.leSignedInt4 <*> Pb.fixed Pb.leSignedInt4)
+                  hush . Pb.runVariableOnByteString ((,,) <$> Pb.fixed Pb.leSignedInt4 <*> Pb.fixed Pb.leSignedInt4 <*> Pb.fixed Pb.leSignedInt4)
                 ),
                 ( "store",
                   hush . Store.decode @(Int32, Int32, Int32)
@@ -43,7 +43,7 @@ main = do
                   let decoder = do
                         size <- Pb.fixed Pb.leSignedInt4
                         Pb.fixed $ Pb.fixedArray @Vu.Vector Pb.leSignedInt4 $ fromIntegral size
-                   in hush . Pb.decodeByteStringWithVariable decoder
+                   in hush . Pb.runVariableOnByteString decoder
                 ),
                 ( "store",
                   let decoder = do
@@ -73,7 +73,7 @@ main = do
                       byteStringDecoder = do
                         size <- Pb.fixed Pb.leSignedInt8
                         Pb.fixed $ Pb.byteArrayAsByteString $ fromIntegral size
-                   in hush . Pb.decodeByteStringWithVariable decoder
+                   in hush . Pb.runVariableOnByteString decoder
                 ),
                 ( "store",
                   hush . Store.decode

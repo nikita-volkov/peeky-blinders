@@ -16,9 +16,9 @@ import PtrPeeker.Prelude
 -- * The number of additional bytes required if input is too short
 --
 -- * Successfully decoded value
-{-# INLINE decodeByteStringWithFixed #-}
-decodeByteStringWithFixed :: Fixed a -> ByteString -> Either Int a
-decodeByteStringWithFixed (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
+{-# INLINE runFixedOnByteString #-}
+runFixedOnByteString :: Fixed a -> ByteString -> Either Int a
+runFixedOnByteString (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
   if bsSize > size
     then Right . unsafeDupablePerformIO . withForeignPtr bsFp $ \p ->
       peek (plusPtr p bsOff)

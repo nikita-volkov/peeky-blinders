@@ -26,7 +26,7 @@ points = do
   Data.Vector.replicateM (fromIntegral count) point
 
 decodePoint :: ByteString -> Either Int (Data.Vector.Vector Point)
-decodePoint = decodeByteStringWithVariable points
+decodePoint = runVariableOnByteString points
 ```
 
 ## Documentation
