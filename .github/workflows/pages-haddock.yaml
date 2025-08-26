@@ -52,7 +52,7 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: cabal build --haddock-html --haddock-hyperlink-source --haddock-quickjump --only-dependencies -j +RTS -A128m -n2m -N -RTS
+        run: cabal build --only-dependencies -j +RTS -A128m -n2m -N -RTS
 
       - name: Save dependencies cache
         uses: actions/cache/save@v4
@@ -63,74 +63,15 @@ jobs:
 
       - name: Build docs
         shell: bash
-        run:
-          cabal haddock all -j +RTS -A128m -n2m -N -RTS --haddock-html --haddock-hyperlink-source --haddock-quickjump
-
-      - name: Collect documentation
-        run: |
-          set -eu
-          mkdir -p site
-          # Find all top-level Haddock doc roots (each package)
-          mapfile -t roots < <(find dist-newstyle/build -type d -path "*/doc/html/*" -maxdepth 8)
-          if [ "${#roots[@]}" -eq 0 ]; then
-            echo "No Haddock roots found!" >&2
-            exit 1
-          fi
-          echo "Found Haddock roots:"
-          printf '%s\n' "${roots[@]}"
-          # If multi-package, place each under its package name directory
-          for r in "${roots[@]}"
-          do
-            pkg=$(basename "$r")
-            # Each root contains index.html already
-            mkdir -p "site/${pkg}"
-            (shopt -s dotglob; cp -a "$r/"* "site/${pkg}/")
-          done
-          # If single package, lift its content to top-level for cleaner URL
-          if [ "${#roots[@]}" -eq 1 ]
-          then
-            pkg=$(basename "${roots[0]}")
-            rsync -a "site/${pkg}/" site/
-            rm -rf "site/${pkg}"
-          # Create a simple index if multiple packages
-          elif [ "${#roots[@]}" -gt 1 ]
-          then
-            cat > site/index.html <<EOF
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-          <meta charset="UTF-8">
-          <title>Haddock Documentation</title>
-          <style>
-          body { font: 16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; margin: 2rem; }
-          ul { line-height: 1.6; }
-          a { text-decoration: none; color: #0366d6; }
-          a:hover { text-decoration: underline; }
-          </style>
-          </head>
-          <body>
-          <h1>Available Package Documentation</h1>
-          <ul>
-          EOF
-            for r in "${roots[@]}"
-            do
-              pkg=$(basename "$r")
-              echo "<li><a href=\"${pkg}/index.html\">${pkg}</a></li>" >> site/index.html
-            done
-            cat >> site/index.html <<EOF
-          </ul>
-          </body>
-          </html>
-          EOF
-          fi
+        run: cabal haddock-project --hackage
 
       - name: Add .nojekyll (avoid Jekyll processing)
-        run: touch site/.nojekyll
+        run: touch haddocks/.nojekyll
 
       - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v4
         with:
-          path: site
+          path: haddocks
 
       - name: Deploy to GitHub Pages
         id: deploy
