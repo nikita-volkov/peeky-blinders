@@ -7,6 +7,24 @@ import Data.Vector.Generic.Mutable qualified as Vgm
 import Ptr.IO qualified
 import PtrPeeker.Prelude
 
+-- * Execution
+
+-- |
+-- Execute a fixed decoder on a ByteString.
+--
+-- Returns either:
+-- * 'Left Int' - The number of additional bytes required if input is too short
+-- * 'Right a' - Successfully decoded value
+{-# INLINE decodeByteStringFixedly #-}
+decodeByteStringFixedly :: Fixed a -> ByteString -> Either Int a
+decodeByteStringFixedly (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
+  if bsSize > size
+    then Right . unsafeDupablePerformIO . withForeignPtr bsFp $ \p ->
+      peek (plusPtr p bsOff)
+    else Left $ size - bsSize
+
+-- * Declarations
+
 -- |
 -- A highly optimized decoder for fixed-size data structures.
 --

@@ -91,6 +91,7 @@ library
   other-modules:
     PtrPeeker.Fixed
     PtrPeeker.Prelude
+    PtrPeeker.Variable
 
   build-depends:
     base >=4.14 && <5,
