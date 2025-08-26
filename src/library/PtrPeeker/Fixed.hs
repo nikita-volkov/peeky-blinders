@@ -12,9 +12,9 @@ import PtrPeeker.Prelude
 -- Execute a fixed decoder on a ByteString.
 --
 -- Returns either:
--- 
+--
 -- * The number of additional bytes required if input is too short
--- 
+--
 -- * Successfully decoded value
 {-# INLINE decodeByteStringWithFixed #-}
 decodeByteStringWithFixed :: Fixed a -> ByteString -> Either Int a
