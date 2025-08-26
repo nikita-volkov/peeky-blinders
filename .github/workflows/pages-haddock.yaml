@@ -1,0 +1,137 @@
+name: Haddock Documentation (GitHub Pages)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+# Prevent overlapping publishes on rapid pushes
+concurrency:
+  group: haddock-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Set up build tools
+        id: setup
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: 9.12
+          cabal-version: 3.16
+
+      - name: Configure
+        shell: bash
+        run: cabal configure --enable-documentation
+
+      - name: Generate the plan
+        shell: bash
+        run: cabal build all --dry-run
+
+      - name: Restore cached dependencies
+        uses: actions/cache/restore@v4
+        id: cache
+        env:
+          key: haddock-${{ runner.os }}-${{ steps.setup.outputs.cabal-version }}-${{ steps.setup.outputs.ghc-version }}-${{ github.job }}
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ env.key }}-${{ hashFiles('**/plan.json') }}
+          restore-keys: ${{ env.key }}
+
+      - name: Install dependencies
+        shell: bash
+        run: cabal build --haddock-html --haddock-hyperlink-source --haddock-quickjump --only-dependencies -j +RTS -A128m -n2m -N -RTS
+
+      - name: Save dependencies cache
+        uses: actions/cache/save@v4
+        if: ${{ steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key }}
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ steps.cache.outputs.cache-primary-key }}
+
+      - name: Build docs
+        shell: bash
+        run:
+          cabal haddock all -j +RTS -A128m -n2m -N -RTS --haddock-html --haddock-hyperlink-source --haddock-quickjump
+
+      - name: Collect documentation
+        run: |
+          set -eu
+          mkdir -p site
+          # Find all top-level Haddock doc roots (each package)
+          mapfile -t roots < <(find dist-newstyle/build -type d -path "*/doc/html/*" -maxdepth 8)
+          if [ "${#roots[@]}" -eq 0 ]; then
+            echo "No Haddock roots found!" >&2
+            exit 1
+          fi
+          echo "Found Haddock roots:"
+          printf '%s\n' "${roots[@]}"
+          # If multi-package, place each under its package name directory
+          for r in "${roots[@]}"
+          do
+            pkg=$(basename "$r")
+            # Each root contains index.html already
+            mkdir -p "site/${pkg}"
+            (shopt -s dotglob; cp -a "$r/"* "site/${pkg}/")
+          done
+          # If single package, lift its content to top-level for cleaner URL
+          if [ "${#roots[@]}" -eq 1 ]
+          then
+            pkg=$(basename "${roots[0]}")
+            rsync -a "site/${pkg}/" site/
+            rm -rf "site/${pkg}"
+          # Create a simple index if multiple packages
+          elif [ "${#roots[@]}" -gt 1 ]
+          then
+            cat > site/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+          <meta charset="UTF-8">
+          <title>Haddock Documentation</title>
+          <style>
+          body { font: 16px/1.4 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; margin: 2rem; }
+          ul { line-height: 1.6; }
+          a { text-decoration: none; color: #0366d6; }
+          a:hover { text-decoration: underline; }
+          </style>
+          </head>
+          <body>
+          <h1>Available Package Documentation</h1>
+          <ul>
+          EOF
+            for r in "${roots[@]}"
+            do
+              pkg=$(basename "$r")
+              echo "<li><a href=\"${pkg}/index.html\">${pkg}</a></li>" >> site/index.html
+            done
+            cat >> site/index.html <<EOF
+          </ul>
+          </body>
+          </html>
+          EOF
+          fi
+
+      - name: Add .nojekyll (avoid Jekyll processing)
+        run: touch site/.nojekyll
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
