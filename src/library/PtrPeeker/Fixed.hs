@@ -14,9 +14,9 @@ import PtrPeeker.Prelude
 -- Returns either:
 -- * 'Left Int' - The number of additional bytes required if input is too short
 -- * 'Right a' - Successfully decoded value
-{-# INLINE decodeByteStringFixedly #-}
-decodeByteStringFixedly :: Fixed a -> ByteString -> Either Int a
-decodeByteStringFixedly (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
+{-# INLINE decodeByteStringWithFixed #-}
+decodeByteStringWithFixed :: Fixed a -> ByteString -> Either Int a
+decodeByteStringWithFixed (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
   if bsSize > size
     then Right . unsafeDupablePerformIO . withForeignPtr bsFp $ \p ->
       peek (plusPtr p bsOff)
@@ -39,7 +39,7 @@ decodeByteStringFixedly (Fixed size peek) (Bsi.PS bsFp bsOff bsSize) =
 -- * Performance is critical and data layout is predictable
 -- * The binary format has a static, well-defined structure
 --
--- 'Fixed' decoders can be lifted to 'Variable' using 'fixedly', but the
+-- 'Fixed' decoders can be lifted to 'Variable' using 'fixed', but the
 -- reverse conversion is not possible due to the compile-time size requirement.
 --
 -- Example usage:
@@ -168,7 +168,7 @@ leSignedInt8 = Fixed 8 Ptr.IO.peekLEInt64
 --
 -- @
 -- byteString :: 'Variable' ByteString
--- byteString = 'fixedly' 'beSignedInt4' >>= 'fixedly' . 'byteArrayAsByteString' . fromIntegral
+-- byteString = 'fixed' 'beSignedInt4' >>= 'fixed' . 'byteArrayAsByteString' . fromIntegral
 -- @
 {-# INLINE byteArrayAsByteString #-}
 byteArrayAsByteString :: Int -> Fixed ByteString
@@ -181,7 +181,7 @@ byteArrayAsByteString size = Fixed size $ \p -> Ptr.IO.peekBytes p size
 --
 -- @
 -- shortByteString :: 'Variable' ShortByteString
--- shortByteString = 'fixedly' 'beSignedInt4' >>= 'fixedly' . 'byteArrayAsShortByteString' . fromIntegral
+-- shortByteString = 'fixed' 'beSignedInt4' >>= 'fixed' . 'byteArrayAsShortByteString' . fromIntegral
 -- @
 {-# INLINE byteArrayAsShortByteString #-}
 byteArrayAsShortByteString :: Int -> Fixed ShortByteString

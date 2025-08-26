@@ -19,13 +19,13 @@ main =
     $ [ testCase "Unterminated C-string" $ do
           assertEqual "" Nothing
             $ either (const Nothing) Just
-            $ Pb.decodeByteStringVariably Pb.nullTerminatedStringAsByteString "\1\2\3\4",
+            $ Pb.decodeByteStringWithVariable Pb.nullTerminatedStringAsByteString "\1\2\3\4",
         testCase "Terminated C-string" $ do
           assertEqual "" (Right "abc")
-            $ Pb.decodeByteStringVariably Pb.nullTerminatedStringAsByteString "abc\0d",
+            $ Pb.decodeByteStringWithVariable Pb.nullTerminatedStringAsByteString "abc\0d",
         testCase "Composition after C-string" $ do
           assertEqual "" (Right ("abc", "def"))
-            $ flip Pb.decodeByteStringVariably "abc\0def\0"
+            $ flip Pb.decodeByteStringWithVariable "abc\0def\0"
             $ (,)
             <$> Pb.nullTerminatedStringAsByteString
             <*> Pb.nullTerminatedStringAsByteString,
@@ -34,9 +34,9 @@ main =
           let bs = Cereal.runPut $ do
                 Cereal.putInt32be $ fromIntegral $ Vu.length vec
                 Vu.forM_ vec $ Cereal.putInt32be
-              res = flip Pb.decodeByteStringVariably bs $ do
-                size <- Pb.fixedly Pb.beSignedInt4
-                Pb.fixedly $ Pb.fixedArray Pb.beSignedInt4 $ fromIntegral size
+              res = flip Pb.decodeByteStringWithVariable bs $ do
+                size <- Pb.fixed Pb.beSignedInt4
+                Pb.fixed $ Pb.fixedArray Pb.beSignedInt4 $ fromIntegral size
           return $ Right vec == res,
         testProperty "variableArray" $ do
           size <- Qc.choose (0, 99)
@@ -49,13 +49,13 @@ main =
                 V.forM_ vec $ \x -> do
                   Cereal.putByteString x
                   Cereal.putWord8 0
-              res = flip Pb.decodeByteStringVariably bs $ do
-                size <- Pb.fixedly Pb.beSignedInt4
+              res = flip Pb.decodeByteStringWithVariable bs $ do
+                size <- Pb.fixed Pb.beSignedInt4
                 Pb.variableArray Pb.nullTerminatedStringAsByteString $ fromIntegral size
           return $ Right vec == res,
         testCase "forceSize" $ do
           assertEqual "" (Left 1)
-            $ Pb.decodeByteStringVariably (Pb.forceSize 3 (Pb.fixedly Pb.beSignedInt4)) "\1\2\3\4"
+            $ Pb.decodeByteStringWithVariable (Pb.forceSize 3 (Pb.fixed Pb.beSignedInt4)) "\1\2\3\4"
           let bs = Cereal.runPut $ do
                 Cereal.putInt32be 5
                 Cereal.putWord8 0
@@ -63,10 +63,10 @@ main =
                 Cereal.putWord8 0
                 Cereal.putInt32be 7
               dec = do
-                a <- Pb.forceSize 7 $ Pb.fixedly Pb.beSignedInt4
-                b <- Pb.fixedly Pb.beSignedInt4
+                a <- Pb.forceSize 7 $ Pb.fixed Pb.beSignedInt4
+                b <- Pb.fixed Pb.beSignedInt4
                 return (a, b)
-           in assertEqual "" (Right (5, 7)) $ Pb.decodeByteStringVariably dec bs
+           in assertEqual "" (Right (5, 7)) $ Pb.decodeByteStringWithVariable dec bs
           assertEqual "" (Right 1)
-            $ Pb.decodeByteStringVariably (Pb.forceSize 4 (Pb.fixedly Pb.beSignedInt4)) "\0\0\0\1"
+            $ Pb.decodeByteStringWithVariable (Pb.forceSize 4 (Pb.fixed Pb.beSignedInt4)) "\0\0\0\1"
       ]

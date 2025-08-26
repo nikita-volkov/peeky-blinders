@@ -20,25 +20,25 @@
 --
 -- -- Decode variable-length data
 -- variableString = do
---   len <- fixedly beUnsignedInt4
---   fixedly (byteArrayAsByteString (fromIntegral len))
+--   len <- fixed beUnsignedInt4
+--   fixed (byteArrayAsByteString (fromIntegral len))
 --
 -- -- Execute decoders
--- result1 = decodeByteStringFixedly pointDecoder bytes
--- result2 = decodeByteStringVariably variableString bytes
+-- result1 = decodeByteStringWithFixed pointDecoder bytes
+-- result2 = decodeByteStringWithVariable variableString bytes
 -- @
 module PtrPeeker
   ( -- * Execution
-    decodeByteStringVariably,
-    decodeByteStringVariablyWithRemainders,
-    decodeByteStringFixedly,
-    decodePtrVariablyWithRemainders,
+    decodeByteStringWithVariable,
+    decodeByteStringWithVariableWithRemainders,
+    decodeByteStringWithFixed,
+    decodePtrWithVariableWithRemainders,
 
     -- * Variable
     Variable,
     hasMore,
     forceSize,
-    fixedly,
+    fixed,
     nullTerminatedStringAsByteString,
     nullTerminatedStringAsShortByteString,
     variableArray,

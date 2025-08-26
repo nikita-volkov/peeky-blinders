@@ -16,9 +16,9 @@ import PtrPeeker.Prelude
 -- Returns either:
 -- * 'Left Int' - The number of additional bytes required if input is too short
 -- * 'Right a' - Successfully decoded value
-{-# INLINE decodeByteStringVariably #-}
-decodeByteStringVariably :: Variable a -> ByteString -> Either Int a
-decodeByteStringVariably (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
+{-# INLINE decodeByteStringWithVariable #-}
+decodeByteStringWithVariable :: Variable a -> ByteString -> Either Int a
+decodeByteStringWithVariable (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO
     $ withForeignPtr bsFp
     $ \p ->
@@ -30,8 +30,8 @@ decodeByteStringVariably (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
 -- Returns either:
 -- * 'Left Int' - The number of additional bytes required if input is too short
 -- * 'Right (a, ByteString)' - Successfully decoded value and unconsumed bytes
-decodeByteStringVariablyWithRemainders :: Variable a -> ByteString -> Either Int (a, ByteString)
-decodeByteStringVariablyWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
+decodeByteStringWithVariableWithRemainders :: Variable a -> ByteString -> Either Int (a, ByteString)
+decodeByteStringWithVariableWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize) =
   unsafeDupablePerformIO
     $ withForeignPtr bsFp
     $ \ptr ->
@@ -55,9 +55,9 @@ decodeByteStringVariablyWithRemainders (Variable peek) (Bsi.PS bsFp bsOff bsSize
 -- Fails with the amount of extra bytes required at least if it\'s too short.
 --
 -- Succeeds returning the output, the next pointer, and the remaining available bytes.
-{-# INLINE decodePtrVariablyWithRemainders #-}
-decodePtrVariablyWithRemainders :: Variable a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
-decodePtrVariablyWithRemainders (Variable peek) ptr avail =
+{-# INLINE decodePtrWithVariableWithRemainders #-}
+decodePtrWithVariableWithRemainders :: Variable a -> Ptr Word8 -> Int -> IO (Either Int (a, Ptr Word8, Int))
+decodePtrWithVariableWithRemainders (Variable peek) ptr avail =
   peek
     (pure . Left)
     (\output ptr avail -> return (Right (output, ptr, avail)))
@@ -84,7 +84,7 @@ decodePtrVariablyWithRemainders (Variable peek) ptr avail =
 -- * Working with formats that have variable-length encoding
 --
 -- For better performance with fixed-size data, consider using 'Fixed' instead.
--- You can convert a 'Fixed' decoder to 'Variable' using 'fixedly', but not
+-- You can convert a 'Fixed' decoder to 'Variable' using 'fixed', but not
 -- the other way around.
 --
 -- Example usage:
@@ -93,8 +93,8 @@ decodePtrVariablyWithRemainders (Variable peek) ptr avail =
 -- -- Decode a length-prefixed string
 -- variableLengthString :: Variable ByteString
 -- variableLengthString = do
---   len <- fixedly beUnsignedInt4
---   fixedly (byteArrayAsByteString (fromIntegral len))
+--   len <- fixed beUnsignedInt4
+--   fixed (byteArrayAsByteString (fromIntegral len))
 -- @
 newtype Variable output
   = Variable
@@ -152,9 +152,9 @@ forceSize size (Variable dec) =
 --
 -- This allows you to use fixed-size decoders within variable-size parsing
 -- contexts. The reverse conversion (Variable to Fixed) is not possible.
-{-# INLINE fixedly #-}
-fixedly :: Fixed a -> Variable a
-fixedly (Fixed size io) = Variable $ \fail proceed p avail ->
+{-# INLINE fixed #-}
+fixed :: Fixed a -> Variable a
+fixed (Fixed size io) = Variable $ \fail proceed p avail ->
   if avail >= size
     then io p >>= \x -> proceed x (plusPtr p size) (avail - size)
     else fail $ size - avail

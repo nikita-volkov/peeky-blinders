@@ -22,25 +22,25 @@ point = Point <$> beSignedInt4 <*> beSignedInt4 <*> beSignedInt4
 
 points :: Variable (Data.Vector.Vector Point)
 points = do
-  count <- fixedly beUnsignedInt4
-  Data.Vector.replicateM (fromIntegral count) (fixedly point)
+  count <- fixed beUnsignedInt4
+  Data.Vector.replicateM (fromIntegral count) (fixed point)
 
 -- Execute decoders
 decodePoint :: ByteString -> Either Int Point
-decodePoint = decodeByteStringFixedly point
+decodePoint = decodeByteStringWithFixed point
 ```
 
 # Benchmarks
 
 ```
-benchmarking int32-le-triplet/ptr-peeker/fixedly
+benchmarking int32-le-triplet/ptr-peeker/fixed
 time                 14.89 ns   (14.71 ns .. 15.10 ns)
                      0.999 R²   (0.999 R² .. 1.000 R²)
 mean                 14.77 ns   (14.71 ns .. 14.94 ns)
 std dev              294.0 ps   (210.5 ps .. 498.3 ps)
 variance introduced by outliers: 30% (moderately inflated)
 
-benchmarking int32-le-triplet/ptr-peeker/variably
+benchmarking int32-le-triplet/ptr-peeker/variable
 time                 16.80 ns   (16.74 ns .. 16.90 ns)
                      1.000 R²   (1.000 R² .. 1.000 R²)
 mean                 16.84 ns   (16.74 ns .. 17.02 ns)

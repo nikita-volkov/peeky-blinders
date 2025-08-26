@@ -18,11 +18,11 @@ main = do
               Cereal.putInt32le 3
             correctDecoding = (1, 2, 3)
             subjects =
-              [ ( "ptr-peeker/fixedly",
-                  hush . Pb.decodeByteStringVariably (Pb.fixedly $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
+              [ ( "ptr-peeker/fixed",
+                  hush . Pb.decodeByteStringWithVariable (Pb.fixed $ (,,) <$> Pb.leSignedInt4 <*> Pb.leSignedInt4 <*> Pb.leSignedInt4)
                 ),
-                ( "ptr-peeker/variably",
-                  hush . Pb.decodeByteStringVariably ((,,) <$> Pb.fixedly Pb.leSignedInt4 <*> Pb.fixedly Pb.leSignedInt4 <*> Pb.fixedly Pb.leSignedInt4)
+                ( "ptr-peeker/variable",
+                  hush . Pb.decodeByteStringWithVariable ((,,) <$> Pb.fixed Pb.leSignedInt4 <*> Pb.fixed Pb.leSignedInt4 <*> Pb.fixed Pb.leSignedInt4)
                 ),
                 ( "store",
                   hush . Store.decode @(Int32, Int32, Int32)
@@ -41,9 +41,9 @@ main = do
             subjects =
               [ ( "ptr-peeker",
                   let decoder = do
-                        size <- Pb.fixedly Pb.leSignedInt4
-                        Pb.fixedly $ Pb.fixedArray @Vu.Vector Pb.leSignedInt4 $ fromIntegral size
-                   in hush . Pb.decodeByteStringVariably decoder
+                        size <- Pb.fixed Pb.leSignedInt4
+                        Pb.fixed $ Pb.fixedArray @Vu.Vector Pb.leSignedInt4 $ fromIntegral size
+                   in hush . Pb.decodeByteStringWithVariable decoder
                 ),
                 ( "store",
                   let decoder = do
@@ -68,12 +68,12 @@ main = do
             subjects =
               [ ( "ptr-peeker",
                   let decoder = do
-                        size <- Pb.fixedly Pb.leSignedInt8
+                        size <- Pb.fixed Pb.leSignedInt8
                         Pb.variableArray @V.Vector byteStringDecoder $ fromIntegral size
                       byteStringDecoder = do
-                        size <- Pb.fixedly Pb.leSignedInt8
-                        Pb.fixedly $ Pb.byteArrayAsByteString $ fromIntegral size
-                   in hush . Pb.decodeByteStringVariably decoder
+                        size <- Pb.fixed Pb.leSignedInt8
+                        Pb.fixed $ Pb.byteArrayAsByteString $ fromIntegral size
+                   in hush . Pb.decodeByteStringWithVariable decoder
                 ),
                 ( "store",
                   hush . Store.decode
