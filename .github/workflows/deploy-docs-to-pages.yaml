@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+  workflow_call:
 
 # Prevent overlapping publishes on rapid pushes
 concurrency:
