@@ -126,9 +126,6 @@ instance Monad Variable where
   Variable lPeek >>= rk = Variable $ \fail proceed ->
     lPeek fail $ \lr -> case rk lr of Variable rPeek -> rPeek fail proceed
 
-instance MonadIO Variable where
-  liftIO io = Variable $ \_ proceed p avail -> io >>= \res -> proceed res p avail
-
 -- |
 -- Check whether more data is available.
 hasMore :: Variable Bool
