@@ -15,6 +15,10 @@ description:
 
   The library delivers superior performance compared to alternatives like "cereal" and "store", making it ideal for high-throughput applications, networking, and systems programming.
 
+homepage: https://github.com/nikita-volkov/ptr-peeker
+bug-reports: https://github.com/nikita-volkov/ptr-peeker/issues
+author: Nikita Volkov <nikita.y.volkov@mail.ru>
+maintainer: Nikita Volkov <nikita.y.volkov@mail.ru>
 copyright: (c) 2021, Nikita Volkov
 license: MIT
 license-file: LICENSE
