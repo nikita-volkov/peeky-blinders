@@ -17,6 +17,10 @@ jobs:
     uses: ./.github/workflows/format-and-test.yaml
     secrets: inherit
 
+  deploy-docs-to-pages:
+    uses: ./.github/workflows/deploy-docs-to-pages.yaml
+    secrets: inherit
+
   release:
     needs:
       - format-and-test
